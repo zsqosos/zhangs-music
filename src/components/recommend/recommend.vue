@@ -1,7 +1,7 @@
 <template>
   <div class="recommend">
-    <scroll ref="scrolll" :data="discList">
-      <div class="recommend-content">
+    <scroll class="recommend-content" ref="scroll" :data="discList">
+      <div>
         <div v-if="recommends.length" class="slider-wrapper">
           <div class="slider-content">
             <slider>
@@ -28,10 +28,10 @@
           </ul>
         </div>
       </div>
+      <div class="loading-wrapper" v-show="!discList.length">
+        <loading></loading>
+      </div>
     </scroll>
-    <div class="loading-wrapper" v-show="!discList.length">
-      <loading></loading>
-    </div>
   </div>
 </template>
 
@@ -70,13 +70,13 @@ export default {
     },
     imgLoaded() {
       if (!this.imgChecked) {
-        this.$refs.scrolll.refresh()
+        this.$refs.scroll.refresh()
         this.imgChecked = true
       }
     },
     avatarLoaded() {
       if (!this.avatarChecked) {
-        this.$refs.scrolll.refresh()
+        this.$refs.scroll.refresh()
         this.avatarChecked = true
       }
     }
@@ -91,6 +91,7 @@ export default {
 
 <style lang="stylus">
   @import "~common/stylus/variable"
+
   .recommend
     position: fixed
     width: 100%
