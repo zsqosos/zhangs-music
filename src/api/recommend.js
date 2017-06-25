@@ -1,14 +1,11 @@
 import jsonp from '../common/js/jsonp'
-import {
-  commonParmas,
-  options
-} from './config'
+import {commonParams, options} from './config'
 import axios from 'axios'
 
 export function getRecommend() {
   const url = 'https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg'
 
-  const data = Object.assign({}, commonParmas, {
+  const data = Object.assign({}, commonParams, {
     platfrom: 'h5',
     uin: 0,
     needNewCode: 1
@@ -20,7 +17,7 @@ export function getRecommend() {
 export function getDiscList() {
   const url = '/api/getDiscList'
 
-  const data = Object.assign({}, commonParmas, {
+  const data = Object.assign({}, commonParams, {
     platfrom: 'yqq',
     hostUin: 0,
     sin: 0,

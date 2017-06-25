@@ -37,7 +37,6 @@ export default {
       if (!this.$refs.scroll) {
         return
       }
-      console.log(this.$refs.scroll)
       this.scroll = new Bscroll(this.$refs.scroll, {
         protoType: this.protoType,
         click: this.click
@@ -62,7 +61,6 @@ export default {
   watch: {
     data() {
       setTimeout(() => {
-        console.log('listdata')
         this.refresh()
       }, 20)
     }

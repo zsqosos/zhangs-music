@@ -18,7 +18,7 @@
           <ul>
             <li v-for="item in discList" class="item">
               <div class="avatar-left">
-                <img width="60" height="60" :src="item.imgurl" @load="avatarLoaded">
+                <img width="60" height="60" v-lazy="item.imgurl" @load="avatarLoaded">
               </div>
               <div class="text-right">
                 <h2 class="name" v-html="item.creator.name"></h2>
@@ -27,11 +27,11 @@
             </li>
           </ul>
         </div>
-        <div class="loading-wrapper" v-show="!discList.length">
-          <loading></loading>
-        </div>
       </div>
     </scroll>
+    <div class="loading-wrapper" v-show="!discList.length">
+      <loading></loading>
+    </div>
   </div>
 </template>
 
@@ -71,14 +71,12 @@ export default {
     imgLoaded() {
       if (!this.imgChecked) {
         this.$refs.scrolll.refresh()
-        console.log('img')
         this.imgChecked = true
       }
     },
     avatarLoaded() {
       if (!this.avatarChecked) {
         this.$refs.scrolll.refresh()
-        console.log('avatar')
         this.avatarChecked = true
       }
     }
@@ -142,9 +140,9 @@ export default {
               color: $color-text
             .description
               color: $color-text-d
-      .loading-wrapper
-        position: absolute
-        width: 100%
-        top: 50%
-        transform: translateY(-50%)
+    .loading-wrapper
+      position: absolute
+      top: 50%
+      width: 100%
+      transform: translateY(50%)
 </style>

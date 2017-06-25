@@ -1,15 +1,39 @@
 <template>
-  <div>
-    歌手
+  <div class="singer">
+    {{singer}}
   </div>
 </template>
 
 <script>
-export default {
+import { getSingerList } from 'api/singer'
+import { ERR_OK } from 'api/config'
 
+export default {
+  data() {
+    return {
+      singer: []
+    }
+  },
+  created() {
+    this._getSingerList()
+  },
+  methods: {
+    _getSingerList() {
+      getSingerList().then(res => {
+        console.log(res)
+        if (res.code === ERR_OK) {
+          this.singer = res.data
+        }
+      })
+    }
+  }
 }
 </script>
 
-<style lang="stylus">
-
+<style scoped lang="stylus">
+  .singer
+    position: fixed
+    top: 88px
+    width: 100%
+    height: 100%
 </style>
