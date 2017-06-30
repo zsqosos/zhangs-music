@@ -1,6 +1,6 @@
 <template>
   <div class="scroll-wrapper" ref="scroll">
-      <slot></slot>
+    <slot></slot>
   </div>
 </template>
 
@@ -12,7 +12,7 @@ export default {
       type: Boolean,
       default: true
     },
-    protoType: {
+    probeType: {
       type: Number,
       default: 1
     },
@@ -36,9 +36,15 @@ export default {
         return
       }
       this.scroll = new Bscroll(this.$refs.scroll, {
-        protoType: this.protoType,
+        probeType: this.probeType,
         click: this.click
       })
+      if (this.listenScroll) {
+        let _this = this
+        this.scroll.on('scroll', (pos) => {
+          _this.$emit('scroll', pos)
+        })
+      }
     },
     disable() {
       this.scroll && this.scroll.disable()

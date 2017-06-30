@@ -1,5 +1,5 @@
 <template>
-  <scroll class="listview" :data="data" ref="scroll">
+  <scroll class="listview" :data="data" :probe-type="probeType" :listen-scroll="listenScroll" @scroll="scroll" ref="scroll">
     <ul>
       <li v-if="data.length" class="group" v-for="group in data" ref="groupList">
         <h2 class="title">{{group.title}}</h2>
@@ -11,9 +11,9 @@
         </ul>
       </li>
     </ul>
-    <div class="list-shortcut" @touchstart="onShortcutTouchStart">
+    <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove="onShortcutTouchMove">
       <ul>
-        <li class="shortcut-item" v-for="(item,index) in shortcut" :data-index="index">{{item}}</li>
+        <li class="shortcut-item" :class="{current:currentIndex===index}" v-for="(item,index) in shortcut" :data-index="index">{{item}}</li>
       </ul>
     </div>
   </scroll>
@@ -22,6 +22,8 @@
 <script>
 import Scroll from 'base/scroll/scroll'
 import { getData } from 'common/js/dom'
+
+const ANCHOR_HEIGHT = 18
 
 export default {
   props: {
@@ -32,8 +34,14 @@ export default {
   },
   data() {
     return {
-
+      scrollY: -1,
+      currentIndex: 0
     }
+  },
+  created() {
+    this.listenScroll = true
+    this.probeType = 3
+    this.listHeight = []
   },
   computed: {
     shortcut() {
@@ -44,11 +52,54 @@ export default {
   },
   methods: {
     onShortcutTouchStart(e) {
-      let touchIndex = getData(e.target, 'index')
-      this._scrollTo(touchIndex)
+      this.touchStartIndex = parseInt(getData(e.target, 'index'))
+      this.scrollStartY = e.touches[0].clientY
+      this._scrollTo(this.touchStartIndex)
+    },
+    onShortcutTouchMove(e) {
+      let nowTouchY = e.touches[0].pageY
+      let delta = nowTouchY - this.scrollStartY
+      let nowTouchIndex = this.touchStartIndex + Math.floor(delta / ANCHOR_HEIGHT)
+      this._scrollTo(nowTouchIndex)
+    },
+    scroll(data) {
+      this.scrollY = -data.y
     },
     _scrollTo(index) {
+      if (index < 0 || index > this.shortcut.length - 1) {
+        return
+      }
       this.$refs.scroll.scrollToElement(this.$refs.groupList[index], 0)
+    },
+    _calcHeight() {
+      let listItemHeight = 0
+      let listItem = this.$refs.groupList
+      this.listHeight.push(0)
+      for (let i = 0; i < listItem.length; i++) {
+        listItemHeight += listItem[i].clientHeight
+        this.listHeight.push(listItemHeight)
+      }
+    }
+  },
+  watch: {
+    data() {
+      setTimeout(() => {
+        this._calcHeight()
+      }, 20)
+    },
+    scrollY() {
+      // console.log(this.listHeight)
+      // console.log(this.scrollY)
+      for (let i = 0; i < this.listHeight.length - 1; i++) {
+        let heightBottom = this.listHeight[i]
+        let heightTop = this.listHeight[i + 1]
+        // console.log(heightBottom, heightTop, this.scrollY)
+        if (this.scrollY >= heightBottom && this.scrollY < heightTop) {
+          console.log(i)
+          this.currentIndex = i
+          return
+        }
+      }
     }
   },
   components: {
@@ -104,6 +155,6 @@ export default {
         line-height: 1
         color: $color-text-l
         font-size: $font-size-small
-        .current
+        &.current
           color: $color-theme
 </style>
