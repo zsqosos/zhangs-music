@@ -4,7 +4,7 @@
       <li v-if="data.length" class="group" v-for="group in data" ref="groupList">
         <h2 class="title">{{group.title}}</h2>
         <ul>
-          <li class="list-item" v-for="listitem in group.data">
+          <li class="list-item" v-for="listitem in group.data" @click="selectSinger(listitem)">
             <img class="avatar" width="50" height="50" v-lazy="listitem.avatar">
             <span class="name">{{listitem.name}}</span>
           </li>
@@ -16,14 +16,23 @@
         <li class="shortcut-item" :class="{current:currentIndex===index}" v-for="(item,index) in shortcut" :data-index="index">{{item}}</li>
       </ul>
     </div>
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+      <div class="fixed-title">{{fixedTitle}}</div>
+    </div>
+    <div class="loading-wrapper" v-show="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script>
 import Scroll from 'base/scroll/scroll'
 import { getData } from 'common/js/dom'
+import loading from 'base/loading/loading'
+import { mapMutations } from 'vuex'
 
 const ANCHOR_HEIGHT = 18
+const TITLE_HEIGHT = 30
 
 export default {
   props: {
@@ -35,7 +44,8 @@ export default {
   data() {
     return {
       scrollY: -1,
-      currentIndex: 0
+      currentIndex: 0,
+      diff: -1
     }
   },
   created() {
@@ -48,27 +58,44 @@ export default {
       return this.data.map(item => {
         return item.title.substr(0, 1)
       })
+    },
+    fixedTitle() {
+      if (this.scrollY < 0) return
+      return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
     }
   },
   methods: {
+    selectSinger(singer) {
+      this.$emit('selectedSinger', singer)
+      this.set_singer(singer)
+    },
     onShortcutTouchStart(e) {
-      this.touchStartIndex = parseInt(getData(e.target, 'index'))
+      let data = getData(e.target, 'index')
+      if (!data) return
+      this.touchStartIndex = parseInt(data)
       this.scrollStartY = e.touches[0].clientY
-      this._scrollTo(this.touchStartIndex)
+      this.currentIndex = this._restrictIndex(this.touchStartIndex)
+      this._scrollTo(this.currentIndex)
     },
     onShortcutTouchMove(e) {
       let nowTouchY = e.touches[0].pageY
       let delta = nowTouchY - this.scrollStartY
       let nowTouchIndex = this.touchStartIndex + Math.floor(delta / ANCHOR_HEIGHT)
-      this._scrollTo(nowTouchIndex)
+      this.currentIndex = this._restrictIndex(nowTouchIndex)
+      this._scrollTo(this.currentIndex)
     },
     scroll(data) {
       this.scrollY = -data.y
     },
-    _scrollTo(index) {
-      if (index < 0 || index > this.shortcut.length - 1) {
-        return
+    _restrictIndex(index) {
+      if (index < 0) {
+        index = 0
+      } else if (index > this.listHeight.length - 2) {
+        index = this.listHeight.length - 2
       }
+      return index
+    },
+    _scrollTo(index) {
       this.$refs.scroll.scrollToElement(this.$refs.groupList[index], 0)
     },
     _calcHeight() {
@@ -79,7 +106,10 @@ export default {
         listItemHeight += listItem[i].clientHeight
         this.listHeight.push(listItemHeight)
       }
-    }
+    },
+    ...mapMutations({
+      set_singer: 'SET_SINGER'
+    })
   },
   watch: {
     data() {
@@ -88,22 +118,29 @@ export default {
       }, 20)
     },
     scrollY() {
-      // console.log(this.listHeight)
-      // console.log(this.scrollY)
-      for (let i = 0; i < this.listHeight.length - 1; i++) {
-        let heightBottom = this.listHeight[i]
-        let heightTop = this.listHeight[i + 1]
-        // console.log(heightBottom, heightTop, this.scrollY)
+      let listHeight = this.listHeight
+      for (let i = 0; i < listHeight.length - 1; i++) {
+        let heightBottom = listHeight[i]
+        let heightTop = listHeight[i + 1]
         if (this.scrollY >= heightBottom && this.scrollY < heightTop) {
-          console.log(i)
+          this.diff = heightTop - this.scrollY
           this.currentIndex = i
           return
         }
       }
+    },
+    diff(diff) {
+      let moveY = (diff < TITLE_HEIGHT && diff > 0) ? diff - TITLE_HEIGHT : 0
+      if (this.moveY === moveY) {
+        return
+      }
+      this.moveY = moveY
+      this.$refs.fixed.style.transform = `translate3d(0, ${moveY}px, 0)`
     }
   },
   components: {
-    Scroll
+    Scroll,
+    loading
   }
 }
 </script>
@@ -157,4 +194,21 @@ export default {
         font-size: $font-size-small
         &.current
           color: $color-theme
+    .list-fixed
+      position: absolute
+      top: 0
+      left: 0
+      width: 100%
+      .fixed-title
+        height: 30px
+        line-height: 30px
+        padding-left: 20px
+        font-size: $font-size-small
+        color: $color-text-l
+        background: $color-highlight-background
+    .loading-wrapper
+      position: absolute
+      width: 100%
+      top: 50%
+      transform: translateY(-50%)
 </style>
