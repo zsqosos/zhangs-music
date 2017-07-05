@@ -12,10 +12,13 @@
         </div>
       </div>
     </div>
+    <song-list></song-list>
   </div>
 </template>
 
 <script>
+import songList from 'base/song-list/song-list'
+
 export default {
   props: {
     songs: {
@@ -37,6 +40,9 @@ export default {
     bgStyle() {
       return `background-image:url(${this.bgImage})`
     }
+  },
+  components: {
+    songList
   }
 }
 </script>
