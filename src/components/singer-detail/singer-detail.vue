@@ -39,7 +39,9 @@ export default {
       }
       getSingerDetail(this.singer.id).then(res => {
         if (res.code === ERR_OK) {
+          console.log(res.data)
           this.songs = this._normalizeSong(res.data.list)
+          console.log(this.songs)
         }
       })
     },
@@ -49,6 +51,8 @@ export default {
         if (item.musicData.songid && item.musicData.albummid) {
           return createSong(item.musicData)
         }
+      }).filter((item) => {
+        return item
       })
     }
   },

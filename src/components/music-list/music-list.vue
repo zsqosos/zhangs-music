@@ -12,7 +12,7 @@
         </div>
       </div>
     </div>
-    <song-list></song-list>
+    <song-list :songs="songs"></song-list>
   </div>
 </template>
 
