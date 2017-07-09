@@ -39,21 +39,27 @@ export default {
       }
       getSingerDetail(this.singer.id).then(res => {
         if (res.code === ERR_OK) {
-          console.log(res.data)
           this.songs = this._normalizeSong(res.data.list)
-          console.log(this.songs)
         }
       })
     },
     _normalizeSong(songList) {
       if (!songList) return
-      return songList.map(item => {
-        if (item.musicData.songid && item.musicData.albummid) {
-          return createSong(item.musicData)
+      let ret = []
+      songList.forEach((item) => {
+        let { musicData } = item
+        if (musicData.songid && musicData.albummid) {
+          ret.push(createSong(musicData))
         }
-      }).filter((item) => {
-        return item
       })
+      return ret
+      // return songList.map(item => {
+      //   if (item.musicData.songid && item.musicData.albummid) {
+      //     return createSong(item.musicData)
+      //   }
+      // }).filter((item) => {
+      //   return item
+      // })
     }
   },
   components: {

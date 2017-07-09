@@ -1,5 +1,5 @@
 <template>
-  <div class="scroll-wrapper" ref="scroll">
+  <div ref="scroll">
     <slot></slot>
   </div>
 </template>
@@ -73,7 +73,5 @@ export default {
 </script>
 
 <style lang="stylus">
-  .scroll-wrapper
-    height: 100%
-    overflow: hidden
+
 </style>

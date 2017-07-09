@@ -1,23 +1,39 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back" @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
-    <div class="bg-image" :style="bgStyle">
-      <div class="play-wrapper">
+    <div class="bg-image" :style="bgStyle" ref="bgImg">
+      <div class="play-wrapper" ref="playBtn" v-show="songs.length">
         <div class="play">
           <i class="icon-play"></i>
           <span class="text">播放全部</span>
         </div>
       </div>
+      <div class="filter" ref="filter"></div>
     </div>
-    <song-list :songs="songs"></song-list>
+    <div class="bg-layer" ref="layer"></div>
+    <scroll @scroll="scroll" :data="songs" :probe-type="probeType" :listen-scroll="listenScroll" class="list" ref="list">
+      <div class="song-list-wrapper">
+        <song-list :songs="songs"></song-list>
+      </div>
+      <div class="loading-container">
+        <loading class="loading" v-show="!songs.length"></loading>
+      </div>
+    </scroll>
   </div>
 </template>
 
 <script>
-import songList from 'base/song-list/song-list'
+import SongList from 'base/song-list/song-list'
+import Scroll from 'base/scroll/scroll'
+import Loading from 'base/loading/loading'
+import { prefixStyle } from 'common/js/dom'
+
+const RESERVED_HEIGHT = 40
+const transform = prefixStyle('transform')
+const a = prefixStyle('desff')
 
 export default {
   props: {
@@ -36,13 +52,65 @@ export default {
       default: ''
     }
   },
+  data() {
+    return {
+      scrollY: 0
+    }
+  },
   computed: {
     bgStyle() {
       return `background-image:url(${this.bgImage})`
     }
   },
+  methods: {
+    back() {
+      this.$router.back()
+    },
+    scroll(pos) {
+      this.scrollY = pos.y
+    }
+  },
+  created() {
+    this.probeType = 3
+    this.listenScroll = true
+    console.log(a)
+  },
+  mounted() {
+    this.bgImgHeight = this.$refs.bgImg.clientHeight
+    this.minTranslateY = -this.bgImgHeight + RESERVED_HEIGHT
+    this.$refs.list.$el.style.top = `${this.bgImgHeight}px`
+  },
+  watch: {
+    scrollY(newY) {
+      let translateY = Math.max(newY, this.minTranslateY)
+      let zIndex = 0
+      let scale = 1
+      const percent = Math.abs(newY / this.minTranslateY)
+      if (newY > 0) {
+        scale = 1 + percent
+        zIndex = 10
+      }
+
+      this.$refs.layer.style[transform] = `translateY(${translateY}px)`
+
+      if (this.minTranslateY > newY) {
+        zIndex = 10
+        this.$refs.bgImg.style.paddingTop = 0
+        this.$refs.bgImg.style.height = `${RESERVED_HEIGHT}px`
+        this.$refs.playBtn.style.display = 'none'
+      } else {
+        this.$refs.bgImg.style.paddingTop = '70%'
+        this.$refs.bgImg.style.height = 0
+        this.$refs.playBtn.style.display = ''
+      }
+      this.$refs.bgImg.style.zIndex = zIndex
+      this.$refs.bgImg.style[transform] = `scale(${scale})`
+    }
+  },
   components: {
-    songList
+    SongList,
+    Scroll,
+    Loading
   }
 }
 </script>
@@ -111,4 +179,28 @@ export default {
             display: inline-block
             vertical-align: middle
             font-size: $font-size-small
+      .filter
+        position: absolute
+        top: 0
+        left: 0
+        width:100%
+        height: 100%
+        background: rgba(1, 17, 27, 0.4)
+    .bg-layer
+      position: relative
+      height: 100%
+      background: $color-background
+    .list
+      position: fixed
+      top: 0
+      bottom: 0
+      width: 100%
+      background: $color-background
+      .song-list-wrapper
+        padding: 20px 30px
+      .loading-container
+        position: absolute
+        width: 100%
+        top: 50%
+        transform:translateY(-50%)
 </style>
