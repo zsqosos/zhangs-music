@@ -1,6 +1,6 @@
 <template>
   <div class="player">
-    <div class="normal-player">
+    <div v-show="fullScreen" class="normal-player">
       播放器
     </div>
     <div class="mini-player"></div>
@@ -8,13 +8,18 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex'
+import { mapGetters } from 'vuex'
 
 export default {
-  methods: {
+  mounted() {
+    console.log(this.playList)
+  },
+  computed: {
     ...mapGetters([
       'fullScreen',
-      'player'
+      'playing',
+      'playList',
+      'sequenceList'
     ])
   }
 }
@@ -25,7 +30,6 @@ export default {
 @import "~common/stylus/mixin"
 
   .player
-    display :none
     .normal-player
       position: absolute
       left: 0
