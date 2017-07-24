@@ -2,10 +2,10 @@
   <div class="player">
     <div v-show="fullScreen" class="normal-player">
       <div class="background">
-        <img height="100%" width="100%" :src="dsa">
+        <img height="100%" width="100%" :src="currentSong.img">
       </div>
       <div class="top">
-        <div class="back">
+        <div @click="back" class="back">
           <i class="icon-back"></i>
         </div>
         <h1 class="title" v-html="currentSong.name"></h1>
@@ -15,11 +15,11 @@
         <div class="middle-l">
           <div class="cd-wrapper">
             <div class="cd">
-              <img class="image" :src="currentSong.image">
+              <img class="image" :src="currentSong.img">
             </div>
           </div>
           <div class="playing-lyric-wrapper">
-            <div class="play-lyric">{{}}</div>
+            <div class="play-lyric"></div>
           </div>
         </div>
       </div>
@@ -29,11 +29,10 @@
           <span class="dot"></span>
         </div>
         <div class="progress-wrapper">
-          <span class="time time-l"></span>
+          <span class="time time-l">{{format(currentTime)}}</span>
           <div class="progress-bar-wrapper">
-
           </div>
-          <span class="time time-r"></span>
+          <span class="time time-r">{{format(currentSong.duration)}}</span>
         </div>
         <div class="operators">
           <div class="icon i-left">
@@ -42,8 +41,8 @@
           <div class="icon i-left">
             <i class="icon-prev"></i>
           </div>
-          <div class="icon i-center">
-            <i :class="iconMode"></i>
+          <div @click="togglePlaying" class="icon i-center">
+            <i :class="playIcon"></i>
           </div>
           <div class="icon i-right">
             <i class="icon-next"></i>
@@ -54,9 +53,9 @@
         </div>
       </div>
     </div>
-    <div class="mini-player">
+    <div @click="open" class="mini-player" v-show="!fullScreen">
       <div class="icon">
-        <img src="" width="40" height="40">
+        <img :src="currentSong.img" width="40" height="40">
       </div>
       <div class="text">
         <h2 class="name" v-html="currentSong.name"></h2>
@@ -67,31 +66,101 @@
         <i class="icon-playlist"></i>
       </div>
     </div>
-    <audio src=""></audio>
+    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
+import { playMode } from 'common/js/config'
 
 export default {
-  created() {
-
+  data() {
+    return {
+      songReady: false,
+      currentTime: 0
+    }
   },
   computed: {
+    iconMode() {
+      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+    },
+    playIcon() {
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
     ...mapGetters([
       'fullScreen',
       'playing',
       'playList',
-      'sequenceList'
+      'sequenceList',
+      'currentSong',
+      'currentIndex',
+      'mode'
     ])
+  },
+  methods: {
+    back() {
+      this.setFullScreen(false)
+    },
+    open() {
+      this.setFullScreen(true)
+    },
+    togglePlaying() {
+      this.setPlayingState(!this.playing)
+    },
+    format(interval) {
+      interval = interval | 0
+      const minute = interval / 60 | 0
+      const second = this._pad(interval % 60)
+      return `${minute}:${second}`
+    },
+    ready() {
+      this.songReady = true
+    },
+    error() {
+      this.songReady = true
+    },
+    end() {
+
+    },
+    updateTime(e) {
+      this.currentTime = e.target.currentTime
+    },
+    _pad(num, n = 2) {
+      let numLen = num.toString().length
+      while (numLen < n) {
+        num = '0' + num
+        numLen++
+      }
+      return num
+    },
+    ...mapMutations({
+      setPlayingState: 'SET_PLAYING_STATE',
+      setFullScreen: 'SET_FULLSCREEN'
+    })
+  },
+  watch: {
+    currentSong(newSong, oldSong) {
+      if (newSong.id === oldSong.id) {
+        return
+      }
+      setTimeout(() => {
+        this.$refs.audio.play()
+      }, 1000)
+    },
+    playing(newPlaying) {
+      let audio = this.$refs.audio
+      this.$nextTick(() => {
+        newPlaying ? audio.play() : audio.pause()
+      })
+    }
   }
 }
 </script>
 
 <style scoped lang="stylus">
-@import "~common/stylus/variable"
-@import "~common/stylus/mixin"
+  @import "~common/stylus/variable"
+  @import "~common/stylus/mixin"
 
   .player
     .normal-player
@@ -128,13 +197,14 @@ export default {
         .title
           width: 70%
           margin: 0 auto
+          line-height: 40px
           text-align: center
           no-wrap()
           font-size: $font-size-large
           color: $color-text
         .subtitle
           line-height: 20px
-          text-align:　center
+          text-align: center
           font-size: $font-size-medium
           color: $color-text
       .middle
@@ -150,6 +220,7 @@ export default {
           position: relative
           width: 100%
           height: 0
+          padding-top: 80%
           .cd-wrapper
             position: absolute
             left: 10%
@@ -167,12 +238,85 @@ export default {
               &.pause
                 animation-play-state: paused
               .image
-                position: absolute
                 left: 0
                 top: 0
                 width: 100%
                 height: 100%
                 border-radius: 50%
+        .middle-r
+          display: inline-block
+          vertical-align: top
+          width: 100%
+          height: 100%
+          overflow: hidden
+          .lyric-wrapper
+            width: 80%
+            margin: 0 auto
+            overflow: hidden
+            text-align: center
+            .text
+              line-height: 32px
+              color: $color-text-l
+              font-size: $font-size-medium
+              &.current
+                color: $color-text
+      .bottom
+        position: absolute
+        bottom: 50px
+        width: 100%
+        .dot-wrapper
+          text-align: center
+          font-size: 0
+          .dot
+            display: inline-block
+            vertical-align: middle
+            margin: 0 4px
+            width: 8px
+            border-radius: 50%
+            background: $color-text-l
+            &.active
+              width: 20px
+              border-radius: 5px
+              background: $color-text-ll
+        .progress-wrapper
+          display: flex
+          align-items: center
+          width: 100%
+          margin: 0 auto
+          padding: 10px 0
+          .time
+            color: $color-text
+            font-size: $font-size-small
+            flex: 0 0 30px
+            line-height: 30px
+            width: 30px
+            &.time-l
+              text-align: left
+            &.time-r
+              text-align: right
+          .progress-bar-wrapper
+            flex: 1
+        .operators
+          display:flex
+          align-items: center
+          .icon
+            flex: 1
+            color: $color-theme
+            &.disable
+              color: $color-theme-d
+            i
+              font-size: 30px
+          .i-left
+            text-align: right
+          .i-center
+            padding: 0 20px
+            text-align: center
+            i
+              font-size: 40px
+          .i-right
+            text-align: left
+          .icon-favorite
+            color: $color-sub-theme
 
     .mini-player
       display: flex
@@ -184,4 +328,42 @@ export default {
       width: 100%
       height: 60px
       background: $color-highlight-background
+      .icon
+        flex: 0 0 40px
+        width: 40px
+        padding: 0 10px 0 20px
+        img
+          border-radius: 50%
+          &.play
+            animation: rotate 10s linear infinite
+          &.pause
+            animation-play-state: paused
+      .text
+        display: flex
+        flex-direction: column
+        justify-content: center
+        flex: 1
+        line-height: 20px
+        overflow: hidden
+        .name
+          margin-bottom: 2px
+          no-wrap()
+          font-size: $font-size-medium
+          color: $color-text
+        .desc
+          no-wrap()
+          font-size: $font-size-small
+          color: $color-text-d
+      .control
+        flex: 0 0 30px
+        width: 30px
+        padding: 0 10px
+        .icon-play-mini, .icon-pause-mini, .icon-palylist
+          font-size: 30px
+          color: $color-theme-d
+        .icon-mini
+          font-size: 32px
+          psition: absolute
+          left: 0
+          top: 0
 </style>

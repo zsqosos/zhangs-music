@@ -25,7 +25,6 @@ export default {
     },
     selectItem(item, index) {
       this.$emit('select', item, index)
-      console.log(1)
     }
   }
 }
