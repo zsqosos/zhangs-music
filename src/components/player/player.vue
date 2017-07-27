@@ -53,7 +53,7 @@
         </div>
       </div>
     </div>
-    <div @click="open" class="mini-player" v-show="!fullScreen">
+    <div @click="open" class="mini-player" v-show="playing&&!fullScreen">
       <div class="icon">
         <img :src="currentSong.img" width="40" height="40">
       </div>
@@ -149,6 +149,9 @@ export default {
       }, 1000)
     },
     playing(newPlaying) {
+      if (!this.songReady) {
+        return
+      }
       let audio = this.$refs.audio
       this.$nextTick(() => {
         newPlaying ? audio.play() : audio.pause()
