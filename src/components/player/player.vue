@@ -106,6 +106,9 @@ export default {
       this.setFullScreen(true)
     },
     togglePlaying() {
+      if(this.songReady){
+        return
+      }
       this.setPlayingState(!this.playing)
     },
     format(interval) {
@@ -136,7 +139,10 @@ export default {
     },
     ...mapMutations({
       setPlayingState: 'SET_PLAYING_STATE',
-      setFullScreen: 'SET_FULLSCREEN'
+      setFullScreen: 'SET_FULLSCREEN',
+      setCurrentIndex: 'SET_CURRENTINDEX',
+      setPlayMode: 'SET_PLAY_MODE',
+      setPlayList: 'SET_PLAYLIST'
     })
   },
   watch: {
