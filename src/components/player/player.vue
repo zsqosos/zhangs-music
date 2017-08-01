@@ -38,13 +38,13 @@
           <div class="icon i-left">
             <i :class="iconMode"></i>
           </div>
-          <div class="icon i-left">
+          <div @click="prev" class="icon i-left">
             <i class="icon-prev"></i>
           </div>
           <div @click="togglePlaying" class="icon i-center">
             <i :class="playIcon"></i>
           </div>
-          <div class="icon i-right">
+          <div @click="next" class="icon i-right">
             <i class="icon-next"></i>
           </div>
           <div class="icon i-right">
@@ -106,7 +106,7 @@ export default {
       this.setFullScreen(true)
     },
     togglePlaying() {
-      if(this.songReady){
+      if (!this.songReady) {
         return
       }
       this.setPlayingState(!this.playing)
@@ -125,6 +125,46 @@ export default {
     },
     end() {
 
+    },
+    next() {
+      if (!this.songReady) {
+        return
+      }
+      if (this.mode === playMode.loop) {
+        this.loop()
+      } else {
+        let index = this.currentIndex + 1
+        if (index === this.playList.length) {
+          index = 0
+        }
+        this.setCurrentIndex(index)
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+      }
+      this.songReady = false
+    },
+    loop() {
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
+    },
+    prev() {
+      if (!this.songReady) {
+        return
+      }
+      if (this.mode === playMode.loop) {
+        this.loop()
+      } else {
+        let index = this.currentIndex - 1
+        if (index < 0) {
+          index = this.playList.length - 1
+        }
+        this.setCurrentIndex(index)
+        if (!this.playing) {
+          this.togglePlaying()
+        }
+      }
+      this.songReady = false
     },
     updateTime(e) {
       this.currentTime = e.target.currentTime
