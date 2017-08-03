@@ -1,6 +1,6 @@
 <template>
   <div class="player" v-show="playList.length>0">
-    <transform name="noraml" @enter="enter" @after-enter="afterEnter" @leave="leave" @after-leave="afterLeave">
+    <transition name="normal" @enter="enter" @after-enter="afterEnter" @leave="leave" @after-leave="afterLeave">
       <div v-show="fullScreen" class="normal-player">
         <div class="background">
           <img height="100%" width="100%" :src="currentSong.img">
@@ -15,7 +15,7 @@
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper">
-              <div class="cd">
+              <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.img">
               </div>
             </div>
@@ -54,11 +54,11 @@
           </div>
         </div>
       </div>
-    </transform>
-    <transform name="mini">
-      <div @click="open" class="mini-player" v-show="playing&&!fullScreen">
+    </transition>
+    <transition name="mini">
+      <div @click="open" class="mini-player" v-show="!fullScreen">
         <div class="icon">
-          <img :src="currentSong.img" width="40" height="40">
+          <img :class="cdCls" :src="currentSong.img" width="40" height="40">
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
@@ -69,7 +69,7 @@
           <i class="icon-playlist"></i>
         </div>
       </div>
-    </transform>
+    </transition>
     <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
@@ -78,6 +78,11 @@
 import { mapGetters, mapMutations } from 'vuex'
 import { playMode } from 'common/js/config'
 import shuffle from 'common/js/util'
+// import animation from 'create-keyframe-animation'
+// import prefixStyle from 'common/js/dom'
+
+// const transform = prefixStyle('transform')
+// const transitionDuration = prefixStyle('transitionDuration')
 
 export default {
   data() {
@@ -87,6 +92,9 @@ export default {
     }
   },
   computed: {
+    cdCls() {
+      return this.playing ? 'play' : 'play pause'
+    },
     iconMode() {
       return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
     },
@@ -156,27 +164,27 @@ export default {
       // }
       this.songReady = false
     },
-    loop() {
-      this.$refs.audio.currentTime = 0
-      this.$refs.audio.play()
-    },
     prev() {
       if (!this.songReady) {
         return
       }
-      if (this.playList.length === 1) {
-        this.loop()
-      } else {
-        let index = this.currentIndex - 1
-        if (index < 0) {
-          index = this.playList.length - 1
-        }
-        this.setCurrentIndex(index)
-        if (!this.playing) {
-          this.togglePlaying()
-        }
+      // if (this.playList.length === 1) {
+      //   this.loop()
+      // } else {
+      let index = this.currentIndex - 1
+      if (index < 0) {
+        index = this.playList.length - 1
       }
+      this.setCurrentIndex(index)
+      if (!this.playing) {
+        this.togglePlaying()
+      }
+      // }
       this.songReady = false
+    },
+    loop() {
+      this.$refs.audio.currentTime = 0
+      this.$refs.audio.play()
     },
     changeMode() {
       let mode = (this.mode + 1) % 3
@@ -198,6 +206,18 @@ export default {
     },
     updateTime(e) {
       this.currentTime = e.target.currentTime
+    },
+    enter() {
+
+    },
+    leave() {
+
+    },
+    afterEnter() {
+
+    },
+    afterLeave() {
+
     },
     _pad(num, n = 2) {
       let numLen = num.toString().length
@@ -309,19 +329,20 @@ export default {
             .cd
               width: 100%
               height: 100%
-              box-sizing: border-box
-              border: 10px solid rgba(255, 255, 255, 0.1)
               border-radius: 50%
               &.play
                 animation: rotate 20s linear infinite
               &.pause
                 animation-play-state: paused
               .image
+                position: absolute
                 left: 0
                 top: 0
                 width: 100%
                 height: 100%
                 border-radius: 50%
+                box-sizing: border-box
+                border: 10px solid rgba(255, 255, 255, 0.1)
         .middle-r
           display: inline-block
           vertical-align: top
@@ -396,7 +417,16 @@ export default {
             text-align: left
           .icon-favorite
             color: $color-sub-theme
-
+      &.normal-enter-active, &.normal-leave-active
+        transition: all 0.4s
+        .top, .bottom
+          transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32)
+      &.normal-enter, &.normal-leave-to
+        opacity: 0
+        .top
+          transform: translateY(-100px)
+        .bottom
+          transform: translateY(100px)
     .mini-player
       display: flex
       align-items: center
@@ -407,6 +437,10 @@ export default {
       width: 100%
       height: 60px
       background: $color-highlight-background
+      &.mini-enter-active, &.mini-leave-active
+        transition: all 0.4s
+      &.mini-enter, &.mini-leave-to
+        opacity: 0
       .icon
         flex: 0 0 40px
         width: 40px
@@ -445,4 +479,9 @@ export default {
           psition: absolute
           left: 0
           top: 0
+  @keyframes rotate
+    0%
+      transform: rotate(0)
+    100%
+      transform: rotate(360deg)
 </style>
