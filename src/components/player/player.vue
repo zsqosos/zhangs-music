@@ -14,7 +14,7 @@
         </div>
         <div class="middle">
           <div class="middle-l">
-            <div class="cd-wrapper">
+            <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
                 <img class="image" :src="currentSong.img">
               </div>
@@ -32,6 +32,7 @@
           <div class="progress-wrapper">
             <span class="time time-l">{{format(currentTime)}}</span>
             <div class="progress-bar-wrapper">
+              <progress-bar :percent="percent" @percentChange="onPercentChange"></progress-bar>
             </div>
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
@@ -64,7 +65,11 @@
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
-        <div class="control"></div>
+        <div class="control">
+          <progress-circle :radius="radius" :percent="percent">
+          <i class="icon-mini" :class="miniIcon"></i>
+          </progress-circle>
+        </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
@@ -78,17 +83,20 @@
 import { mapGetters, mapMutations } from 'vuex'
 import { playMode } from 'common/js/config'
 import shuffle from 'common/js/util'
-// import animation from 'create-keyframe-animation'
-// import prefixStyle from 'common/js/dom'
+import animations from 'create-keyframe-animation'
+import { prefixStyle } from 'common/js/dom'
+import ProgressBar from 'base/progress-bar/progress-bar'
+import ProgressCircle from 'base/progress-circle/progress-circle'
 
-// const transform = prefixStyle('transform')
+const transform = prefixStyle('transform')
 // const transitionDuration = prefixStyle('transitionDuration')
 
 export default {
   data() {
     return {
       songReady: false,
-      currentTime: 0
+      currentTime: 0,
+      radius: 32
     }
   },
   computed: {
@@ -103,6 +111,12 @@ export default {
     },
     disableCls() {
       return this.songReady ? '' : 'disable'
+    },
+    miniIcon() {
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    percent() {
+      return this.currentTime / this.currentSong.duration
     },
     ...mapGetters([
       'fullScreen',
@@ -150,9 +164,6 @@ export default {
       if (!this.songReady) {
         return
       }
-      // if (this.playList.length === 1) {
-      //   this.loop()
-      // } else {
       let index = this.currentIndex + 1
       if (index === this.playList.length) {
         index = 0
@@ -161,16 +172,12 @@ export default {
       if (!this.playing) {
         this.togglePlaying()
       }
-      // }
       this.songReady = false
     },
     prev() {
       if (!this.songReady) {
         return
       }
-      // if (this.playList.length === 1) {
-      //   this.loop()
-      // } else {
       let index = this.currentIndex - 1
       if (index < 0) {
         index = this.playList.length - 1
@@ -179,7 +186,6 @@ export default {
       if (!this.playing) {
         this.togglePlaying()
       }
-      // }
       this.songReady = false
     },
     loop() {
@@ -195,6 +201,7 @@ export default {
       } else {
         list = this.sequenceList
       }
+      // 避免切换播放模式后，当前歌曲发生变化，需在更改播放列表后，重新计算当前歌曲在新列表中的索引值
       this.resetCurrentIndex(list)
       this.setPlayList(list)
     },
@@ -205,27 +212,82 @@ export default {
       this.setCurrentIndex(index)
     },
     updateTime(e) {
+      // 获取当前已播放的时间
       this.currentTime = e.target.currentTime
     },
-    enter() {
+    enter(el, done) {
+      // 进入动画
+      const { x, y, scale } = this._getPosAndScale()
 
-    },
-    leave() {
+      let animation = {
+        0: {
+          transform: `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+        },
+        60: {
+          transform: `translate3d(0, 0, 0) scale(1.1)`
+        },
+        100: {
+          transform: `translate3d(0, 0, 0) scale(1)`
+        }
+      }
 
+      animations.registerAnimation({
+        name: 'move',
+        animation,
+        presets: {
+          duration: 400,
+          easing: 'linear'
+        }
+      })
+
+      animations.runAnimation(this.$refs.cdWrapper, 'move', done)
     },
     afterEnter() {
-
+      // 动画完成后清除动画样式
+      animations.unregisterAnimation('move')
+      this.$refs.cdWrapper.style.animation = ''
+    },
+    leave(el, done) {
+      // 离开动画
+      this.$refs.cdWrapper.style.transition = 'all 0.4s'
+      const { x, y, scale } = this._getPosAndScale()
+      this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`
+      this.$refs.cdWrapper.addEventListener('transitionend', done)
     },
     afterLeave() {
-
+      this.$refs.cdWrapper.style.transition = ''
+      this.$refs.cdWrapper.style[transform] = ''
+    },
+    onPercentChange(percent) {
+      this.$refs.audio.currentTime = this.currentSong.duration * percent
+      if (!this.playing) {
+        this.togglePlaying()
+      }
     },
     _pad(num, n = 2) {
+      // 不足两位在前面补零
       let numLen = num.toString().length
       while (numLen < n) {
         num = '0' + num
         numLen++
       }
       return num
+    },
+    _getPosAndScale() {
+      // 计算mini播放器cd的位置
+      const targetWidth = 40
+      const paddingLeft = 40
+      const paddingBottom = 30
+      const paddingTop = 80
+      const width = window.innerWidth * 0.8
+      const scale = targetWidth / width
+      const x = -(window.innerWidth / 2 - paddingLeft)
+      const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
+      return {
+        x,
+        y,
+        scale
+      }
     },
     ...mapMutations({
       setPlayingState: 'SET_PLAYING_STATE',
@@ -253,6 +315,10 @@ export default {
         newPlaying ? audio.play() : audio.pause()
       })
     }
+  },
+  components: {
+    ProgressBar,
+    ProgressCircle
   }
 }
 </script>
@@ -381,7 +447,7 @@ export default {
         .progress-wrapper
           display: flex
           align-items: center
-          width: 100%
+          width: 80%
           margin: 0 auto
           padding: 10px 0
           .time
@@ -471,12 +537,12 @@ export default {
         flex: 0 0 30px
         width: 30px
         padding: 0 10px
-        .icon-play-mini, .icon-pause-mini, .icon-palylist
-          font-size: 30px
+        .icon-play-mini, .icon-pause-mini, .icon-playlist
+          font-size: 26px
           color: $color-theme-d
         .icon-mini
           font-size: 32px
-          psition: absolute
+          position: absolute
           left: 0
           top: 0
   @keyframes rotate
