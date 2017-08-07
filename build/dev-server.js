@@ -25,7 +25,7 @@ var app = express()
 
 var apiRoutes = express.Router()
 
-apiRoutes.get('/getDiscList', function(req, res) {
+apiRoutes.get('/getDiscList', function (req, res) {
   var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
 
   axios.get(url, {
@@ -36,6 +36,30 @@ apiRoutes.get('/getDiscList', function(req, res) {
     params: req.query
   }).then(response => {
     res.json(response.data)
+  }).catch(e => {
+    console.log(e)
+  })
+})
+
+apiRoutes.get('/lyric', function (req, res) {
+  var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+
+  axios.get(url, {
+    headers: {
+      referer: 'https://c.y.qq.com/',
+      host: 'c.y.qq.com'
+    },
+    params: req.query
+  }).then(response => {
+    var ret = response.data
+    if (typeof ret === 'string') {
+      var reg = /^\w+\(({[^()]+})\)$/
+      var dataString = reg.exec(ret)
+      if(dataString) {
+        ret = JSON.parse(dataString[1])
+      }
+    }
+    res.json(ret)
   }).catch(e => {
     console.log(e)
   })
@@ -56,7 +80,9 @@ var hotMiddleware = require('webpack-hot-middleware')(compiler, {
 // force page reload when html-webpack-plugin template changes
 compiler.plugin('compilation', function (compilation) {
   compilation.plugin('html-webpack-plugin-after-emit', function (data, cb) {
-    hotMiddleware.publish({ action: 'reload' })
+    hotMiddleware.publish({
+      action: 'reload'
+    })
     cb()
   })
 })
@@ -65,7 +91,9 @@ compiler.plugin('compilation', function (compilation) {
 Object.keys(proxyTable).forEach(function (context) {
   var options = proxyTable[context]
   if (typeof options === 'string') {
-    options = { target: options }
+    options = {
+      target: options
+    }
   }
   app.use(proxyMiddleware(options.filter || context, options))
 })
