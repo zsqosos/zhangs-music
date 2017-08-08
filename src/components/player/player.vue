@@ -351,7 +351,6 @@ export default {
         if (this.touch.percent > 0.1) {
           offsetWidth = -window.innerWidth
           opacity = 0
-          console.log(offsetWidth)
           this.currentShow = 'lyric'
         } else {
           opacity = 1

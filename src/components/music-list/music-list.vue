@@ -6,9 +6,9 @@
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImg">
       <div class="play-wrapper" ref="playBtn" v-show="songs.length">
-        <div class="play" @click=""play>
+        <div class="play" @click="_randomPlay">
           <i class="icon-play"></i>
-          <span class="text">播放全部</span>
+          <span class="text">随机播放全部</span>
         </div>
       </div>
       <div class="filter" ref="filter"></div>
@@ -30,7 +30,7 @@ import SongList from 'base/song-list/song-list'
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
 import { prefixStyle } from 'common/js/dom'
-import {mapActions} from 'vuex'
+import { mapActions } from 'vuex'
 
 const RESERVED_HEIGHT = 40
 const transform = prefixStyle('transform')
@@ -75,8 +75,14 @@ export default {
         index: index
       })
     },
+    _randomPlay() {
+      this.randomPlay({
+        list: this.songs
+      })
+    },
     ...mapActions([
-      'selectPlay'
+      'selectPlay',
+      'randomPlay'
     ])
   },
   created() {
