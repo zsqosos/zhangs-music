@@ -1,6 +1,6 @@
 <template>
-  <div class="singer">
-    <list-view @selectedSinger="selectedSinger" :data="singer"></list-view>
+  <div class="singer" ref="singer">
+    <list-view @selectedSinger="selectedSinger" :data="singer" ref="list"></list-view>
     <router-view></router-view>
   </div>
 </template>
@@ -10,11 +10,13 @@ import { getSingerList } from 'api/singer'
 import { ERR_OK } from 'api/config'
 import { Singer } from 'common/js/singer'
 import listView from 'base/listview/listview'
+import { playListMixin } from 'common/js/mixin'
 
 const HOT_TITLE = '热门'
 const HOT_LEN = 10
 
 export default {
+  mixins: [playListMixin],
   data() {
     return {
       singer: []
@@ -24,6 +26,11 @@ export default {
     this._getSingerList()
   },
   methods: {
+    handlePlayList(playList) {
+      const bottom = this.playList.length ? '60px' : ''
+      this.$refs.singer.style.bottom = bottom
+      this.$refs.list.refresh()
+    },
     selectedSinger(singer) {
       this.$router.push(`/singer/${singer.id}`)
     },

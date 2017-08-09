@@ -87,6 +87,9 @@ export default {
     scroll(data) {
       this.scrollY = -data.y
     },
+    refresh() {
+      this.$refs.scroll.refresh()
+    },
     _restrictIndex(index) {
       if (index < 0) {
         index = 0
