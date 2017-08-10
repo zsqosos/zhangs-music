@@ -25,8 +25,8 @@ let elementStyle = document.createElement('div').style
 
 let vendor = (() => {
   let transformNames = {
-    webkit: 'webkitTransform',
     Moz: 'MozTransform',
+    webkit: 'webkitTransform',
     O: 'OTransform',
     ms: 'msTransform',
     standard: 'transform'

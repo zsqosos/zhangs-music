@@ -29,7 +29,6 @@
 import Scroll from 'base/scroll/scroll'
 import { getData } from 'common/js/dom'
 import loading from 'base/loading/loading'
-import { mapMutations } from 'vuex'
 
 const ANCHOR_HEIGHT = 18
 const TITLE_HEIGHT = 30
@@ -67,7 +66,6 @@ export default {
   methods: {
     selectSinger(singer) {
       this.$emit('selectedSinger', singer)
-      this.set_singer(singer)
     },
     onShortcutTouchStart(e) {
       let data = getData(e.target, 'index')
@@ -109,10 +107,7 @@ export default {
         listItemHeight += listItem[i].clientHeight
         this.listHeight.push(listItemHeight)
       }
-    },
-    ...mapMutations({
-      set_singer: 'SET_SINGER'
-    })
+    }
   },
   watch: {
     data() {
