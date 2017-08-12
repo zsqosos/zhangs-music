@@ -15,3 +15,5 @@ export const SET_CURRENTINDEX = 'SET_CURRENTINDEX'
 export const SET_CURRENTSONG = 'SET_CURRENTSONG'
 
 export const SET_DISC_LIST = 'SET_DISC_LIST'
+
+export const SET_TOP_LIST = 'SET_TOP_LIST'
