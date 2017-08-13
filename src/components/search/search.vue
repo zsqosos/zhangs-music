@@ -1,6 +1,6 @@
 <template>
-  <div>
-    搜索
+  <div class="search">
+
   </div>
 </template>
 

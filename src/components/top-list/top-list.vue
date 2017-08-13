@@ -1,6 +1,6 @@
 <template>
   <transition name="slider" class="top-list">
-    <music-list :songs="songs" :title="title" :bgImage="bgImg"></music-list>
+    <music-list :rank="rank" :songs="songs" :title="title" :bgImage="bgImg"></music-list>
   </transition>
 </template>
 
@@ -14,7 +14,8 @@ import { createSong } from 'common/js/song'
 export default {
   data() {
     return {
-      songs: []
+      songs: [],
+      rank: true
     }
   },
   created() {
