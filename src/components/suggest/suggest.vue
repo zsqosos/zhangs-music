@@ -1,7 +1,7 @@
 <template>
-  <div class="suggest">
+  <scroll :data="result" class="suggest">
     <ul class="suggest-list">
-      <li v-for="item in result" class="suggest-item">
+      <li @click="selectSuggestItem(item)" v-for="item in result" class="suggest-item">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
         </div>
@@ -11,12 +11,16 @@
       </li>
     </ul>
     <div class="no-result-wrapper"></div>
-  </div>
+  </scroll>
 </template>
 
 <script>
 import { getSearch } from 'api/search'
 import { ERR_OK } from 'api/config'
+import Scroll from 'base/scroll/scroll'
+import { createSong } from 'common/js/song'
+import { mapMutations, mapActions } from 'vuex'
+import { Singer } from 'common/js/singer'
 
 const perpage = 20
 const TYPE_SINGER = 'singer'
@@ -44,7 +48,7 @@ export default {
       return item.type === TYPE_SINGER ? 'icon-mine' : 'icon-music'
     },
     getDisplayName(item) {
-      return item.type === TYPE_SINGER ? item.singername : `${item.songname} - ${item.singer[0].name}`
+      return item.type === TYPE_SINGER ? item.singername : `${item.name} - ${item.singer}`
     },
     search() {
       this.page = 1
@@ -52,9 +56,20 @@ export default {
       getSearch(this.query, this.page, this.showSinger, perpage).then(res => {
         if (res.code === ERR_OK) {
           this.result = this._genResult(res.data)
-          console.log(this.result)
         }
       })
+    },
+    selectSuggestItem(item) {
+      if (item.type === TYPE_SINGER) {
+        const singer = new Singer({
+          id: item.singermid,
+          name: item.singername
+        })
+        this.$router.push({ path: `/search/${singer.id}` })
+        this.setSinger(singer)
+      } else {
+        console.log('not a singer')
+      }
     },
     _genResult(data) {
       let ret = []
@@ -62,15 +77,33 @@ export default {
         ret.push({ ...data.zhida, ...{ type: TYPE_SINGER } })
       }
       if (data.song) {
-        ret = ret.concat(data.song.list)
+        ret = ret.concat(this._normalizeData(data.song.list))
       }
       return ret
-    }
+    },
+    _normalizeData(data) {
+      let ret = []
+      data.forEach(item => {
+        if (item.songid && item.albumid) {
+          ret.push(createSong(item))
+        }
+      })
+      return ret
+    },
+    ...mapMutations({
+      setSinger: 'SET_SINGER'
+    }),
+    ...mapActions([
+
+    ])
   },
   watch: {
     query() {
       this.search()
     }
+  },
+  components: {
+    Scroll
   }
 }
 </script>

@@ -26,6 +26,7 @@
         </div>
       </div>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -51,7 +52,6 @@ export default {
     },
     changeQuery(query) {
       this.query = query
-      console.log(this.query)
     },
     _getHotKey() {
       getHotKey().then(res => {
