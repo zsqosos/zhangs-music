@@ -31,3 +31,7 @@ export const randomPlay = function ({commit, state}, {list}) {
   commit(types.SET_FULLSCREEN, true)
   commit(types.SET_PLAYING_STATE, true)
 }
+
+export const insertSong = function ({commit, state}, song) {
+
+}

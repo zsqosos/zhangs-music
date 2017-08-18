@@ -23,6 +23,10 @@ export default {
     data: {
       type: Array,
       default: null
+    },
+    pullup: {
+      type: Boolean,
+      dafault: false
     }
   },
   mounted() {
@@ -43,6 +47,11 @@ export default {
         let _this = this
         this.scroll.on('scroll', (pos) => {
           _this.$emit('scroll', pos)
+        })
+      }
+      if (this.pullup) {
+        this.scroll.on('scrollEnd', () => {
+          this.$emit('scrollToEnd')
         })
       }
     },

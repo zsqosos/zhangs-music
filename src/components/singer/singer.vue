@@ -52,7 +52,10 @@ export default {
       }
       originData.forEach((item, index) => {
         if (index < HOT_LEN) {
-          map.hot.data.push(new Singer(item.Fsinger_mid, item.Fsinger_name))
+          map.hot.data.push(new Singer({
+            id: item.Fsinger_mid,
+            name: item.Fsinger_name
+          }))
         }
         const key = item.Findex
         if (!map[key]) {
@@ -61,7 +64,10 @@ export default {
             data: []
           }
         }
-        map[key].data.push(new Singer(item.Fsinger_mid, item.Fsinger_name))
+        map[key].data.push(new Singer({
+          id: item.Fsinger_mid,
+          name: item.Fsinger_name
+        }))
       })
       // 对map进行排序
       let ret = []

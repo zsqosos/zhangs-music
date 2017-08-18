@@ -1,5 +1,5 @@
 <template>
-  <scroll :data="result" class="suggest">
+  <scroll :data="result" class="suggest" :pullup="pullup" @scrollToEnd="search">
     <ul class="suggest-list">
       <li @click="selectSuggestItem(item)" v-for="item in result" class="suggest-item">
         <div class="icon">
@@ -38,9 +38,10 @@ export default {
   },
   data() {
     return {
-      page: 1,
+      page: 0,
       hasMore: true,
-      result: []
+      result: [],
+      pullup: true
     }
   },
   methods: {
@@ -51,13 +52,26 @@ export default {
       return item.type === TYPE_SINGER ? item.singername : `${item.name} - ${item.singer}`
     },
     search() {
-      this.page = 1
-      this.hasMore = true
+      if (!this.hasMore) {
+        return
+      }
+      this.page++
       getSearch(this.query, this.page, this.showSinger, perpage).then(res => {
         if (res.code === ERR_OK) {
-          this.result = this._genResult(res.data)
+          this.result = this.result.concat(this._genResult(res.data))
+          this._checkMore(res.data)
+          console.log(this.hasMore + 'search')
         }
       })
+    },
+    _checkMore(data) {
+      const song = data.song
+      console.log(song.curnum + (song.curpage - 1) * perpage)
+      console.log(song.totalnum)
+      if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
+        this.hasMore = false
+        console.log(this.hasMore + 'checkout')
+      }
     },
     selectSuggestItem(item) {
       if (item.type === TYPE_SINGER) {
@@ -90,6 +104,11 @@ export default {
       })
       return ret
     },
+    _reInitData() {
+      this.page = 0
+      this.result = []
+      this.hasMore = true
+    },
     ...mapMutations({
       setSinger: 'SET_SINGER'
     }),
@@ -98,8 +117,13 @@ export default {
     ])
   },
   watch: {
-    query() {
-      this.search()
+    query(newQuery) {
+      if (!newQuery) {
+        return
+      }
+      this._reInitData()
+      console.log(this.hasMore + 'watch')
+      this.search(newQuery)
     }
   },
   components: {
