@@ -1,4 +1,8 @@
-export default function shuffle(arr) {
+function getRandomNum(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+export function shuffle(arr) {
   let _arr = arr.slice()
   for (let i = 0; i < _arr.length; i++) {
     let j = getRandomNum(0, i)
@@ -9,6 +13,16 @@ export default function shuffle(arr) {
   return _arr
 }
 
-function getRandomNum(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min)
+export function debounce(fn, delay) {
+  let timer
+  console.log(0)
+  return function (...args) {
+    console.log(1)
+    if (timer) {
+      clearTimeout(timer)
+    }
+    timer = setTimeout(() => {
+      fn.apply(this, args)
+    }, delay)
+  }
 }

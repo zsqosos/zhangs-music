@@ -89,7 +89,7 @@
 <script>
 import { mapGetters, mapMutations } from 'vuex'
 import { playMode } from 'common/js/config'
-import shuffle from 'common/js/util'
+import { shuffle } from 'common/js/util'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'

@@ -9,6 +9,7 @@
           <p class="text" v-html="getDisplayName(item)"></p>
         </div>
       </li>
+      <loading v-show="hasMore" text=""></loading>
     </ul>
     <div class="no-result-wrapper"></div>
   </scroll>
@@ -21,6 +22,7 @@ import Scroll from 'base/scroll/scroll'
 import { createSong } from 'common/js/song'
 import { mapMutations, mapActions } from 'vuex'
 import { Singer } from 'common/js/singer'
+import Loading from 'base/loading/loading'
 
 const perpage = 20
 const TYPE_SINGER = 'singer'
@@ -60,17 +62,13 @@ export default {
         if (res.code === ERR_OK) {
           this.result = this.result.concat(this._genResult(res.data))
           this._checkMore(res.data)
-          console.log(this.hasMore + 'search')
         }
       })
     },
     _checkMore(data) {
       const song = data.song
-      console.log(song.curnum + (song.curpage - 1) * perpage)
-      console.log(song.totalnum)
       if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
         this.hasMore = false
-        console.log(this.hasMore + 'checkout')
       }
     },
     selectSuggestItem(item) {
@@ -122,12 +120,12 @@ export default {
         return
       }
       this._reInitData()
-      console.log(this.hasMore + 'watch')
       this.search(newQuery)
     }
   },
   components: {
-    Scroll
+    Scroll,
+    Loading
   }
 }
 </script>
