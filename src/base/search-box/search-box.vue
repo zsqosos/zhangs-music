@@ -1,7 +1,7 @@
 <template>
   <div class="search-box">
     <i class="icon-search"></i>
-    <input v-model="query" class="box" :placeholder="placeholder">
+    <input v-model="query" class="box" :placeholder="placeholder" ref="query">
     <i @click="clear" v-show="query.length" class="icon-dismiss"></i>
   </div>
 </template>
@@ -27,12 +27,17 @@ export default {
     },
     setQuery(query) {
       this.query = query
+    },
+    blur() {
+      this.$refs.query.blur()
     }
   },
   created() {
     this.debounce = debounce((newValue) => {
       this.$emit('query', newValue)
-    }, 1000)
+    }, 200)
+
+    // 使用vm.$watch回调的方式
     // this.$watch('query', debounce((newValue) => {
     //   console.log(2)
     //   this.$emit('query', newValue)

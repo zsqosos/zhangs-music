@@ -21,8 +21,8 @@
             </span>
           </h1>
         </div>
-        <div class="search-result" v-show="query.length">
-          <suggest :query="query"></suggest>
+        <div class="search-result" ref="searchResult" v-show="query.length">
+          <suggest @listScroll="blurInput" ref="suggest" @select="" :query="query"></suggest>
         </div>
       </div>
     </div>
@@ -35,8 +35,10 @@ import SearchBox from 'base/search-box/search-box'
 import Suggest from 'components/suggest/suggest'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/config'
+import { playListMixin } from 'common/js/mixin'
 
 export default {
+  mixins: [playListMixin],
   data() {
     return {
       hotKey: [],
@@ -47,11 +49,19 @@ export default {
     this._getHotKey()
   },
   methods: {
+    handlePlayList(playList) {
+      let bottom = playList.length ? '60px' : ''
+      this.$refs.searchResult.style.bottom = bottom
+      this.$refs.suggest.refresh()
+    },
     setQuery(query) {
       this.$refs.searchBox.setQuery(query)
     },
     changeQuery(query) {
       this.query = query
+    },
+    blurInput() {
+      this.$refs.searchBox.blur()
     },
     _getHotKey() {
       getHotKey().then(res => {

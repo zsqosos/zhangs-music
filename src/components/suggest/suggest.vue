@@ -1,5 +1,5 @@
 <template>
-  <scroll :data="result" class="suggest" :pullup="pullup" @scrollToEnd="search">
+  <scroll :data="result" class="suggest" ref="suggest" :pullup="pullup" :beforeScroll="beforeScroll" @beforeScroll="listScroll" @scrollToEnd="search">
     <ul class="suggest-list">
       <li @click="selectSuggestItem(item)" v-for="item in result" class="suggest-item">
         <div class="icon">
@@ -11,7 +11,9 @@
       </li>
       <loading v-show="hasMore" text=""></loading>
     </ul>
-    <div class="no-result-wrapper"></div>
+    <div class="no-result-wrapper" v-show="!hasMore&&!result.length">
+      <no-result title="抱歉，暂无搜索结果"></no-result>
+    </div>
   </scroll>
 </template>
 
@@ -23,6 +25,7 @@ import { createSong } from 'common/js/song'
 import { mapMutations, mapActions } from 'vuex'
 import { Singer } from 'common/js/singer'
 import Loading from 'base/loading/loading'
+import NoResult from 'base/no-result/no-result'
 
 const perpage = 20
 const TYPE_SINGER = 'singer'
@@ -43,10 +46,14 @@ export default {
       page: 0,
       hasMore: true,
       result: [],
+      beforeScroll: true,
       pullup: true
     }
   },
   methods: {
+    refresh() {
+      this.$refs.suggest.refresh()
+    },
     getIconCls(item) {
       return item.type === TYPE_SINGER ? 'icon-mine' : 'icon-music'
     },
@@ -65,12 +72,6 @@ export default {
         }
       })
     },
-    _checkMore(data) {
-      const song = data.song
-      if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
-        this.hasMore = false
-      }
-    },
     selectSuggestItem(item) {
       if (item.type === TYPE_SINGER) {
         const singer = new Singer({
@@ -80,7 +81,19 @@ export default {
         this.$router.push({ path: `/search/${singer.id}` })
         this.setSinger(singer)
       } else {
-        console.log('not a singer')
+        this.insertSong({
+          song: item
+        })
+        this.$emit('select', item)
+      }
+    },
+    listScroll() {
+      this.$emit('listScroll')
+    },
+    _checkMore(data) {
+      const song = data.song
+      if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
+        this.hasMore = false
       }
     },
     _genResult(data) {
@@ -111,7 +124,7 @@ export default {
       setSinger: 'SET_SINGER'
     }),
     ...mapActions([
-
+      'insertSong'
     ])
   },
   watch: {
@@ -125,7 +138,8 @@ export default {
   },
   components: {
     Scroll,
-    Loading
+    Loading,
+    NoResult
   }
 }
 </script>

@@ -334,7 +334,10 @@ export default {
         const deltaX = touch.pageX - this.touch.startX
         const deltaY = touch.pageY - this.touch.startY
         if (Math.abs(deltaX) < Math.abs(deltaY)) {
+          this.touch.moved = false
           return
+        } else {
+          this.touch.moved = true
         }
         const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
         const offsetWidth = Math.min(0, Math.max(left + deltaX, -window.innerWidth))
@@ -346,6 +349,9 @@ export default {
       }
     },
     middleTouchEnd() {
+      if (!this.touch.moved) {
+        return
+      }
       let offsetWidth, opacity
       if (this.currentShow === 'cd') {
         if (this.touch.percent > 0.1) {

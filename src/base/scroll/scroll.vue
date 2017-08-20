@@ -6,6 +6,10 @@
 
 <script>
 import Bscroll from 'better-scroll'
+
+// const DIRECTION_H = 'horizontal'
+// const DIRECTION_V = 'vertical'
+
 export default {
   props: {
     click: {
@@ -27,12 +31,24 @@ export default {
     pullup: {
       type: Boolean,
       dafault: false
+    },
+    beforeScroll: {
+      type: Boolean,
+      default: false
+    },
+    refreshDelay: {
+      type: Number,
+      default: 20
     }
+    // direction: {
+    //   type: String,
+    //   default: DIRECTION_V
+    // }
   },
   mounted() {
     setTimeout(() => {
       this._initScroll()
-    }, 20)
+    }, this.refreshDelay)
   },
   methods: {
     _initScroll() {
@@ -42,16 +58,26 @@ export default {
       this.scroll = new Bscroll(this.$refs.scroll, {
         probeType: this.probeType,
         click: this.click
+        // eventPassthrough: this.direction === DIRECTION_V ? DIRECTION_H : DIRECTION_V
       })
+
       if (this.listenScroll) {
         let _this = this
         this.scroll.on('scroll', (pos) => {
           _this.$emit('scroll', pos)
         })
       }
+
       if (this.pullup) {
         this.scroll.on('scrollEnd', () => {
-          this.$emit('scrollToEnd')
+          if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+            this.$emit('scrollToEnd')
+          }
+        })
+      }
+      if (this.beforeScroll) {
+        this.scroll.on('beforeScrollStart', () => {
+          this.$emit('beforeScroll')
         })
       }
     },
@@ -75,7 +101,7 @@ export default {
     data() {
       setTimeout(() => {
         this.refresh()
-      }, 20)
+      }, this.refreshDelay)
     }
   }
 }
