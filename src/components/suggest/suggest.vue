@@ -84,8 +84,8 @@ export default {
         this.insertSong({
           song: item
         })
-        this.$emit('select', item)
       }
+      this.$emit('select', item)
     },
     listScroll() {
       this.$emit('listScroll')

@@ -20,9 +20,10 @@
               <i class="icon-clear"></i>
             </span>
           </h1>
+          <search-list :searches="searchHistory"></search-list>
         </div>
         <div class="search-result" ref="searchResult" v-show="query.length">
-          <suggest @listScroll="blurInput" ref="suggest" @select="" :query="query"></suggest>
+          <suggest @listScroll="blurInput" ref="suggest" @select="saveSearch" :query="query"></suggest>
         </div>
       </div>
     </div>
@@ -36,6 +37,8 @@ import Suggest from 'components/suggest/suggest'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/config'
 import { playListMixin } from 'common/js/mixin'
+import { mapActions, mapGetters } from 'vuex'
+import SearchList from 'base/search-list/search-list'
 
 export default {
   mixins: [playListMixin],
@@ -47,6 +50,11 @@ export default {
   },
   created() {
     this._getHotKey()
+  },
+  computed: {
+    ...mapGetters([
+      'searchHistory'
+    ])
   },
   methods: {
     handlePlayList(playList) {
@@ -63,17 +71,24 @@ export default {
     blurInput() {
       this.$refs.searchBox.blur()
     },
+    saveSearch() {
+      this.saveSearchHistory(this.query)
+    },
     _getHotKey() {
       getHotKey().then(res => {
         if (res.code === ERR_OK) {
           this.hotKey = res.data.hotkey.slice(0, 10)
         }
       })
-    }
+    },
+    ...mapActions([
+      'saveSearchHistory'
+    ])
   },
   components: {
     SearchBox,
-    Suggest
+    Suggest,
+    SearchList
   }
 
 }
