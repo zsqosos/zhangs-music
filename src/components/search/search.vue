@@ -16,17 +16,18 @@
         <div class="search-history" v-show="!query.length">
           <h1 class="title">
             <span class="text">搜索历史</span>
-            <span class="clear">
+            <span class="clear" @click="showConfirm">
               <i class="icon-clear"></i>
             </span>
           </h1>
-          <search-list :searches="searchHistory"></search-list>
+          <search-list @select="" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
         </div>
         <div class="search-result" ref="searchResult" v-show="query.length">
           <suggest @listScroll="blurInput" ref="suggest" @select="saveSearch" :query="query"></suggest>
         </div>
       </div>
     </div>
+    <confirm ref="confirm" text="是否清空搜索历史？" confirmBtnText="清空" @confirm="clearHistory"></confirm>
     <router-view></router-view>
   </div>
 </template>
@@ -39,6 +40,7 @@ import { ERR_OK } from 'api/config'
 import { playListMixin } from 'common/js/mixin'
 import { mapActions, mapGetters } from 'vuex'
 import SearchList from 'base/search-list/search-list'
+import Confirm from 'base/confirm/confirm'
 
 export default {
   mixins: [playListMixin],
@@ -74,6 +76,9 @@ export default {
     saveSearch() {
       this.saveSearchHistory(this.query)
     },
+    showConfirm() {
+      this.$refs.confirm.show()
+    },
     _getHotKey() {
       getHotKey().then(res => {
         if (res.code === ERR_OK) {
@@ -82,13 +87,16 @@ export default {
       })
     },
     ...mapActions([
-      'saveSearchHistory'
+      'saveSearchHistory',
+      'deleteSearchHistory',
+      'clearHistory'
     ])
   },
   components: {
     SearchBox,
     Suggest,
-    SearchList
+    SearchList,
+    Confirm
   }
 
 }
