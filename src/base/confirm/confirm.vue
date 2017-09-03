@@ -1,6 +1,6 @@
 <template>
   <div v-show="showFlag" class="confirm">
-    <div class="confirm-wrapper">
+    <div class="confirm-wrapper" @click.stop="">
       <div class="confirm-content">
         <p class="text">{{text}}</p>
         <div class="operate">
@@ -41,7 +41,6 @@ export default {
       this.showFlag = false
     },
     cancel() {
-      console.log(0)
       this.hide()
       this.$emit('cancel')
     },

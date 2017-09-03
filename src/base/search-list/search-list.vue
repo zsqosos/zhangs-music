@@ -3,7 +3,7 @@
     <transition-group name="list" tag="ul">
       <li :key="item" class="search-item" v-for="item in searches" @click="selectItem(item)">
         <span class="text">{{item}}</span>
-        <span class="icon" @click="deleteItem(item)">
+        <span class="icon" @click.stop="deleteItem(item)">
           <i class="icon-delete"></i>
         </span>
       </li>
@@ -21,7 +21,6 @@ export default {
   },
   methods: {
     selectItem(item) {
-      console.log(this.searches)
       this.$emit('select', item)
     },
     deleteItem(item) {

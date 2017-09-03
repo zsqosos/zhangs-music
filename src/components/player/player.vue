@@ -77,30 +77,33 @@
             <i class="icon-mini" :class="miniIcon"></i>
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showPlayList">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
     <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <play-list ref="playList"></play-list>
   </div>
 </template>
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
-import { playMode } from 'common/js/config'
-import { shuffle } from 'common/js/util'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import playList from 'components/playlist/playlist'
+import { playerMixin } from 'common/js/mixin'
+import { playMode } from 'common/js/config'
 
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
 
 export default {
+  mixins: [playerMixin],
   data() {
     return {
       songReady: false,
@@ -119,9 +122,6 @@ export default {
     cdCls() {
       return this.playing ? 'play' : 'play pause'
     },
-    iconMode() {
-      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-    },
     playIcon() {
       return this.playing ? 'icon-pause' : 'icon-play'
     },
@@ -135,13 +135,7 @@ export default {
       return this.currentTime / this.currentSong.duration
     },
     ...mapGetters([
-      'fullScreen',
-      'playing',
-      'playList',
-      'sequenceList',
-      'currentSong',
-      'currentIndex',
-      'mode'
+      'fullScreen'
     ])
   },
   methods: {
@@ -150,6 +144,9 @@ export default {
     },
     open() {
       this.setFullScreen(true)
+    },
+    showPlayList() {
+      this.$refs.playList.show()
     },
     togglePlaying() {
       if (!this.songReady) {
@@ -160,15 +157,18 @@ export default {
         this.currentLyric.togglePlay()
       }
     },
+    // 将时间戳格式化为分钟表示法
     format(interval) {
       interval = interval | 0
       const minute = interval / 60 | 0
       const second = this._pad(interval % 60)
       return `${minute}:${second}`
     },
+    // 歌曲是否准备好播放
     ready() {
       this.songReady = true
     },
+    // 播放发生错误时，将songReade置为true，不影响后续播放
     error() {
       this.songReady = true
     },
@@ -223,25 +223,6 @@ export default {
         this.currentLyric.seek(0)
       }
     },
-    changeMode() {
-      let mode = (this.mode + 1) % 3
-      let list = null
-      this.setPlayMode(mode)
-      if (this.mode === playMode.random) {
-        list = shuffle(this.playList)
-      } else {
-        list = this.sequenceList
-      }
-      // 避免切换播放模式后，当前歌曲发生变化，需在更改播放列表后，重新计算当前歌曲在新列表中的索引值
-      this.resetCurrentIndex(list)
-      this.setPlayList(list)
-    },
-    resetCurrentIndex(list) {
-      let index = list.findIndex((item) => {
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
     updateTime(e) {
       // 获取当前已播放的时间
       this.currentTime = e.target.currentTime
@@ -261,7 +242,7 @@ export default {
           transform: `translate3d(0, 0, 0) scale(1)`
         }
       }
-
+      // 使用animations库注册动画
       animations.registerAnimation({
         name: 'move',
         animation,
@@ -270,7 +251,7 @@ export default {
           easing: 'linear'
         }
       })
-
+      // 运行动画
       animations.runAnimation(this.$refs.cdWrapper, 'move', done)
     },
     afterEnter() {
@@ -302,6 +283,7 @@ export default {
     },
     getLyric() {
       this.currentSong.getLyric().then(lyric => {
+        // 使用其他库处理歌词
         this.currentLyric = new Lyric(lyric, this.handleLyric)
         if (this.playing) {
           this.currentLyric.play()
@@ -312,6 +294,7 @@ export default {
         this.playingLyric = ''
       })
     },
+    // 处理歌词的回调函数
     handleLyric({ lineNum, txt }) {
       this.currentLineNum = lineNum
       this.playingLyric = txt
@@ -322,12 +305,15 @@ export default {
         this.$refs.lyricList.scrollTo(0, 0, 1000)
       }
     },
+    // 播放器歌词与cd切换动画
+    // 滑动开始时记录滑动初始点坐标
     middleTouchStart(e) {
       this.touch.initiated = true
       const touch = e.touches[0]
       this.touch.startX = touch.pageX
       this.touch.startY = touch.pageY
     },
+    // 滑动中记录滑动时的坐标，根据滑动距离移动cd或歌词
     middleTouchMove(e) {
       if (this.touch.initiated) {
         const touch = e.touches[0]
@@ -348,6 +334,7 @@ export default {
         this.$refs.middleL.style[transitionDuration] = 0
       }
     },
+    // 滑动结束状态
     middleTouchEnd() {
       if (!this.touch.moved) {
         return
@@ -404,20 +391,22 @@ export default {
       }
     },
     ...mapMutations({
-      setPlayingState: 'SET_PLAYING_STATE',
-      setFullScreen: 'SET_FULLSCREEN',
-      setCurrentIndex: 'SET_CURRENTINDEX',
-      setPlayMode: 'SET_PLAY_MODE',
-      setPlayList: 'SET_PLAYLIST'
+      setFullScreen: 'SET_FULLSCREEN'
     })
   },
   watch: {
     currentSong(newSong, oldSong) {
+      if (!newSong.id) {
+        return
+      }
       if (newSong.id === oldSong.id) {
         return
       }
       if (this.currentLyric) {
         this.currentLyric.stop()
+        this.currentTime = 0
+        this.palyingLyric = ''
+        this.currentLineNum = 0
       }
       setTimeout(() => {
         this.$refs.audio.play()
@@ -437,7 +426,8 @@ export default {
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    playList
   }
 }
 </script>

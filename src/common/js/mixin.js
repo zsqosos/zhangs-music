@@ -1,4 +1,6 @@
-import {mapGetters} from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
+import { playMode } from 'common/js/config'
+import { shuffle } from 'common/js/util'
 
 export const playListMixin = {
   computed: {
@@ -21,5 +23,51 @@ export const playListMixin = {
     playList(newVal) {
       this.handlePlayList(newVal)
     }
+  }
+}
+
+// player组件与playlist组件公用的逻辑
+export const playerMixin = {
+  computed: {
+    // 播放模式图标
+    iconMode() {
+      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+    },
+    ...mapGetters([
+      'mode',
+      'playList',
+      'sequenceList',
+      'currentSong',
+      'currentIndex',
+      'playing'
+    ])
+  },
+  methods: {
+    // 改变播放模式
+    changeMode() {
+      let mode = (this.mode + 1) % 3
+      let list = null
+      this.setPlayMode(mode)
+      if (this.mode === playMode.random) {
+        list = shuffle(this.playList)
+      } else {
+        list = this.sequenceList
+      }
+      // 避免切换播放模式后，当前歌曲发生变化，需在更改播放列表后，重新计算当前歌曲在新列表中的索引值
+      this.resetCurrentIndex(list)
+      this.setPlayList(list)
+    },
+    resetCurrentIndex(list) {
+      let index = list.findIndex((item) => {
+        return item.id === this.currentSong.id
+      })
+      this.setCurrentIndex(index)
+    },
+    ...mapMutations({
+      setCurrentIndex: 'SET_CURRENTINDEX',
+      setPlayMode: 'SET_PLAY_MODE',
+      setPlayingState: 'SET_PLAYING_STATE',
+      setPlayList: 'SET_PLAYLIST'
+    })
   }
 }
