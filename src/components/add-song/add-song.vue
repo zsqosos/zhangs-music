@@ -8,43 +8,100 @@
         </div>
       </div>
       <div class="search-box-wrapper">
-
+        <search-box ref="searchBox" @query="changeQuery" placeholder="搜索歌曲"></search-box>
       </div>
-      <div class="shortcut">
+      <div class="shortcut" v-show="!query">
+        <switches :switches="switches" :currentIndex="currentIndex" @switch="switchItem"></switches>
         <div class="list-wrapper">
-          <div class="list-scroll">
+          <scroll v-if="currentIndex===0" ref="playHistoryList" :data="playHistory" class="list-scroll">
             <div class="list-inner">
-
+              <song-list @select="selectSong" :songs="playHistory"></song-list>
             </div>
-          </div>
-          <div class="list-scroll">
+          </scroll>
+          <scroll :data="searchHistory" v-if="currentIndex===1" ref="searchHistoryList" class="list-scroll">
             <div class="list-inner">
-
+              <search-list :searches="searchHistory" @select="setQuery" @delete="deleteSearchHistory"></search-list>
             </div>
-          </div>
+          </scroll>
         </div>
       </div>
-      <div class="search-result">
-
+      <div class="search-result" v-show="query">
+        <suggest @listScroll="blurInput" :query="query" :showSinger="showSinger"></suggest>
       </div>
     </div>
   </transition>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+import Suggest from 'components/suggest/suggest'
+import SearchBox from 'base/search-box/search-box'
+import { searchMixin } from 'common/js/mixin'
+import Scroll from 'base/scroll/scroll'
+import Switches from 'base/switches/switches'
+import SongList from 'base/song-list/song-list'
+import SearchList from 'base/search-list/search-list'
+import Song from 'common/js/song'
+
 export default {
+  mixins: [searchMixin],
   data() {
     return {
-      showFlag: false
+      showFlag: false,
+      showSinger: false,
+      currentIndex: 0,
+      switches: [
+        {
+          name: '最近播放'
+        },
+        {
+          name: '搜索历史'
+        }
+      ]
     }
+  },
+  computed: {
+    ...mapGetters([
+      'playHistory'
+    ])
   },
   methods: {
     show() {
       this.showFlag = true
+      setTimeout(() => {
+        if (this.currentIndex === 0) {
+          this.$refs.playHistoryList.refresh()
+        } else {
+          this.$refs.searchHistoryList.refresh()
+        }
+      }, 30)
     },
     hide() {
       this.showFlag = false
-    }
+    },
+    switchItem(index) {
+      this.currentIndex = index
+    },
+    selectSong(item, index) {
+      let song = new Song(item)
+      if (index !== 0) {
+        // console.log(newSong)
+        this.insertSong({
+          song
+        })
+      }
+    },
+    ...mapActions([
+      'insertSong'
+    ])
+  },
+  components: {
+    Suggest,
+    SearchBox,
+    Scroll,
+    Switches,
+    SongList,
+    SearchList
   }
 }
 </script>
@@ -81,4 +138,33 @@ export default {
           padding: 12px
           font-size: 20px
           color: $color-theme
+    .search-box-wrapper
+      margin: 20px
+    .shortcut
+      .list-wrapper
+        position: absolute
+        top: 165px
+        bottom: 0
+        width: 100%
+        .list-scroll
+          height: 100%
+          overflow: hidden
+          .list-inner
+            padding: 20px 30px
+    .search-result
+      position: fixed
+      top: 124px
+      bottom: 0
+      width: 100%
+    .tip-title
+      text-align: center
+      padding: 18px 0
+      font-size: 0
+      .icon-ok
+        font-size: $font-size-medium
+        color: $color-theme
+        margin-right: 4px
+      .text
+        font-size: $font-size-medium
+        color: $color-text
 </style>

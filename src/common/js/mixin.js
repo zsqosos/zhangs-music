@@ -1,7 +1,8 @@
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
 
+// mini播放器存在时，滚动重新计算
 export const playListMixin = {
   computed: {
     ...mapGetters([
@@ -69,5 +70,41 @@ export const playerMixin = {
       setPlayingState: 'SET_PLAYING_STATE',
       setPlayList: 'SET_PLAYLIST'
     })
+  }
+}
+
+// add-song与search组件公用逻辑
+export const searchMixin = {
+  data() {
+    return {
+      query: ''
+    }
+  },
+  computed: {
+    ...mapGetters([
+      'searchHistory'
+    ])
+  },
+  methods: {
+    // 设置搜索框内容
+    setQuery(query) {
+      this.$refs.searchBox.setQuery(query)
+    },
+    // 输入框搜索词改变时重新设置当前query
+    changeQuery(query) {
+      this.query = query
+    },
+    // 滑动时取消输入框焦点，键盘关闭
+    blurInput() {
+      this.$refs.searchBox.blur()
+    },
+    // 保存搜索结果
+    saveSearch() {
+      this.saveSearchHistory(this.query)
+    },
+    ...mapActions([
+      'saveSearchHistory',
+      'deleteSearchHistory'
+    ])
   }
 }

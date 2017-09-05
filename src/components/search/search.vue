@@ -21,7 +21,7 @@
                 <i class="icon-clear"></i>
               </span>
             </h1>
-            <search-list @select="addQuery" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
+            <search-list @select="setQuery" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
           </div>
         </div>
       </scroll>
@@ -39,18 +39,17 @@ import SearchBox from 'base/search-box/search-box'
 import Suggest from 'components/suggest/suggest'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/config'
-import { playListMixin } from 'common/js/mixin'
-import { mapActions, mapGetters } from 'vuex'
+import { playListMixin, searchMixin } from 'common/js/mixin'
+import { mapActions } from 'vuex'
 import SearchList from 'base/search-list/search-list'
 import Confirm from 'base/confirm/confirm'
 import Scroll from 'base/scroll/scroll'
 
 export default {
-  mixins: [playListMixin],
+  mixins: [playListMixin, searchMixin],
   data() {
     return {
       hotKey: [],
-      query: '',
       refreshDelay: 120
     }
   },
@@ -60,10 +59,7 @@ export default {
   computed: {
     shortcut() {
       return this.hotKey.concat(this.searchHistory)
-    },
-    ...mapGetters([
-      'searchHistory'
-    ])
+    }
   },
   methods: {
     handlePlayList(playList) {
@@ -75,24 +71,12 @@ export default {
       this.$refs.searchResult.style.bottom = bottom
       this.$refs.suggest.refresh()
     },
-    setQuery(query) {
-      this.$refs.searchBox.setQuery(query)
-    },
-    changeQuery(query) {
-      this.query = query
-    },
-    blurInput() {
-      this.$refs.searchBox.blur()
-    },
-    saveSearch() {
-      this.saveSearchHistory(this.query)
-    },
     showConfirm() {
       this.$refs.confirm.show()
     },
-    addQuery(item) {
-      this.$refs.searchBox.setQuery(item)
-    },
+    // addQuery(item) {
+    //   this.$refs.searchBox.setQuery(item)
+    // },
     _getHotKey() {
       getHotKey().then(res => {
         if (res.code === ERR_OK) {
@@ -101,8 +85,6 @@ export default {
       })
     },
     ...mapActions([
-      'saveSearchHistory',
-      'deleteSearchHistory',
       'clearHistory'
     ])
   },

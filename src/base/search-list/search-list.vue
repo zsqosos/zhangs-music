@@ -40,10 +40,10 @@ export default {
       align-items: center
       height: 40px
       overflow: hidden
-      &.list-enter-acitve, .list-leave-active
+      &.list-enter-acitve, &.list-leave-active
         transition: all 0.1s
-      &.list-enter, &list-leave-to
-        heigth: 0
+      &.list-enter, &.list-leave-to
+        height: 0
       .text
         flex: 1
         color: $color-text-l

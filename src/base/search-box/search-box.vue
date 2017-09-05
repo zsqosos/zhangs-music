@@ -33,6 +33,7 @@ export default {
     }
   },
   created() {
+    // 截留  函数防抖，200毫秒内只触发一次
     this.debounce = debounce((newValue) => {
       this.$emit('query', newValue)
     }, 200)

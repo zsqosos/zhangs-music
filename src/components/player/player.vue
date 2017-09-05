@@ -82,13 +82,13 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <audio :src="currentSong.url" ref="audio" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
     <play-list ref="playList"></play-list>
   </div>
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
@@ -167,6 +167,8 @@ export default {
     // 歌曲是否准备好播放
     ready() {
       this.songReady = true
+      this.savePlayHistory(this.currentSong)
+      // 此处需要同步歌词 待填坑。。。
     },
     // 播放发生错误时，将songReade置为true，不影响后续播放
     error() {
@@ -392,7 +394,10 @@ export default {
     },
     ...mapMutations({
       setFullScreen: 'SET_FULLSCREEN'
-    })
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   watch: {
     currentSong(newSong, oldSong) {
@@ -402,8 +407,10 @@ export default {
       if (newSong.id === oldSong.id) {
         return
       }
+      this.songReady = false
       if (this.currentLyric) {
         this.currentLyric.stop()
+        this.currentLyric = null
         this.currentTime = 0
         this.palyingLyric = ''
         this.currentLineNum = 0
