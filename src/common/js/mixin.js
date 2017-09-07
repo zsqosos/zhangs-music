@@ -1,6 +1,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
+import Song from 'common/js/song'
 
 // mini播放器存在时，滚动重新计算
 export const playListMixin = {
@@ -40,7 +41,8 @@ export const playerMixin = {
       'sequenceList',
       'currentSong',
       'currentIndex',
-      'playing'
+      'playing',
+      'favoriteList'
     ])
   },
   methods: {
@@ -64,12 +66,41 @@ export const playerMixin = {
       })
       this.setCurrentIndex(index)
     },
+    toggleFavorite(song) {
+      if (this.isFavorite(song)) {
+        this.deleteFavoritelist({
+          song: new Song(song)
+        })
+      } else {
+        this.saveFavoriteList({
+          song: new Song(song)
+        })
+      }
+    },
+    getFavoriteIcon(song) {
+      if (this.isFavorite(song)) {
+        return 'icon-favoirte'
+      } else {
+        return 'icon-not-favorite'
+      }
+    },
+    isFavorite(song) {
+      console.log(song)
+      const index = this.favoriteList.findIndex(item => {
+        return song.id === item.id
+      })
+      return index > -1
+    },
     ...mapMutations({
       setCurrentIndex: 'SET_CURRENTINDEX',
       setPlayMode: 'SET_PLAY_MODE',
       setPlayingState: 'SET_PLAYING_STATE',
       setPlayList: 'SET_PLAYLIST'
-    })
+    }),
+    ...mapActions([
+      'saveFavoriteList',
+      'deleteFavoritelist'
+    ])
   }
 }
 

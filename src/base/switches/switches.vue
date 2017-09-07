@@ -11,7 +11,9 @@ export default {
   props: {
     switches: {
       type: Array,
-      default: []
+      default() {
+        return []
+      }
     },
     currentIndex: {
       type: Number,

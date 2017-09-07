@@ -44,20 +44,20 @@
             <span class="time time-r">{{format(currentSong.duration)}}</span>
           </div>
           <div class="operators">
-            <div @click="changeMode" class="icon i-left">
-              <i :class="iconMode"></i>
+            <div class="icon i-left">
+              <i @click="changeMode" :class="iconMode"></i>
             </div>
-            <div @click="prev" class="icon i-left" :class="disableCls">
-              <i class="icon-prev"></i>
+            <div class="icon i-left" :class="disableCls">
+              <i @click="prev" class="icon-prev"></i>
             </div>
-            <div @click="togglePlaying" class="icon i-center" :class="disableCls">
-              <i :class="playIcon"></i>
+            <div class="icon i-center" :class="disableCls">
+              <i @click="togglePlaying" :class="playIcon"></i>
             </div>
-            <div @click="next" class="icon i-right" :class="disableCls">
-              <i class="icon-next"></i>
+            <div class="icon i-right" :class="disableCls">
+              <i @click="next" class="icon-next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon-not-favorite icon"></i>
+              <i @click="toggleFavorite(currentSong)" class="icon" :class="getFavoriteIcon(currentSong)"></i>
             </div>
           </div>
         </div>
