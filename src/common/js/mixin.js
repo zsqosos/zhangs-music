@@ -1,7 +1,7 @@
 import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
-import Song from 'common/js/song'
+// import Song from 'common/js/song'
 
 // mini播放器存在时，滚动重新计算
 export const playListMixin = {
@@ -42,7 +42,8 @@ export const playerMixin = {
       'currentSong',
       'currentIndex',
       'playing',
-      'favoriteList'
+      'favoriteList',
+      'searchHistory'
     ])
   },
   methods: {
@@ -68,26 +69,20 @@ export const playerMixin = {
     },
     toggleFavorite(song) {
       if (this.isFavorite(song)) {
-        this.deleteFavoritelist({
-          song: new Song(song)
-        })
+        this.deleteFavoriteList(song)
       } else {
-        this.saveFavoriteList({
-          song: new Song(song)
-        })
+        this.saveFavoriteList(song)
       }
     },
     getFavoriteIcon(song) {
       if (this.isFavorite(song)) {
-        return 'icon-favoirte'
-      } else {
-        return 'icon-not-favorite'
+        return 'icon-favorite'
       }
+      return 'icon-not-favorite'
     },
     isFavorite(song) {
-      console.log(song)
       const index = this.favoriteList.findIndex(item => {
-        return song.id === item.id
+        return item.id === song.id
       })
       return index > -1
     },
@@ -99,7 +94,7 @@ export const playerMixin = {
     }),
     ...mapActions([
       'saveFavoriteList',
-      'deleteFavoritelist'
+      'deleteFavoriteList'
     ])
   }
 }
