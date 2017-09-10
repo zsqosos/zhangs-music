@@ -144,7 +144,7 @@ export default {
       .close
         position: absolute
         top: 0
-        right: 0
+        right: 8px
         .icon-close
           display: block
           padding: 12px

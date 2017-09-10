@@ -188,6 +188,7 @@ export default {
       // 当播放列表只有一首歌时，也可以循环播放
       if (this.playList.length === 1) {
         this.loop()
+        return
       } else {
         let index = this.currentIndex + 1
         if (index === this.playList.length) {
@@ -206,6 +207,7 @@ export default {
       }
       if (this.playList.length === 1) {
         this.loop()
+        return
       } else {
         let index = this.currentIndex - 1
         if (index < 0) {
@@ -285,6 +287,10 @@ export default {
     },
     getLyric() {
       this.currentSong.getLyric().then(lyric => {
+        // 如果获取到的歌词与当前歌曲不符合，则return
+        if (this.currentSong.lyric !== lyric) {
+          return
+        }
         // 使用其他库处理歌词
         this.currentLyric = new Lyric(lyric, this.handleLyric)
         if (this.playing) {
