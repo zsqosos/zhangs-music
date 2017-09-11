@@ -47,10 +47,16 @@ export default {
       if (!this.slider) {
         return
       }
-      this._setSliderWidth(true)
+      setTimeout(() => {
+        this.refresh()
+      }, 20)
     })
   },
   methods: {
+    refresh() {
+      this._setSliderWidth(true)
+      this.slider.refresh()
+    },
     _setSliderWidth(isResize) {
       this.children = this.$refs.sliderGroup.children
 
@@ -75,10 +81,11 @@ export default {
         scrollX: true,
         scrollY: false,
         momentum: false,
-        snap: true,
-        snapLoop: this.loop,
-        snapThreshold: 0.3,
-        snapSpeed: 400,
+        snap: {
+          loop: this.loop,
+          threshold: 0.3,
+          speed: 400
+        },
         click: true
       })
 

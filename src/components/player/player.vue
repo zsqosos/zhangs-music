@@ -277,7 +277,7 @@ export default {
     onPercentChange(percent) {
       // 拖动进度条后，改变歌曲进度
       const currentTime = this.currentSong.duration * percent
-      this.$refs.audio.currentTime = currentTime
+      this.currentTime = this.$refs.audio.currentTime = currentTime
       if (!this.playing) {
         this.togglePlaying()
       }

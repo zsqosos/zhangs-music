@@ -12,8 +12,8 @@
           </h1>
         </div>
         <scroll :refreshDelay="refreshDelay" ref="listContet" :data="playList" class="list-content">
-          <transition-group name="list" tag="ul">
-            <li :key="item.id" ref="listItems" v-for="(item,index) in sequenceList" class="item" @click="selectItem(item,index)">
+          <transition-group ref="list" name="list" tag="ul">
+            <li :key="item.id" v-for="(item,index) in sequenceList" class="item" @click="selectItem(item,index)">
               <i class="current" :class="getCurrentCls(item)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like" @click.stop="toggleFavorite(item)">
@@ -92,8 +92,8 @@ export default {
       let index = this.sequenceList.findIndex((item) => {
         return currentSong.id === item.id
       })
-      let listItems = this.$refs.listItems
-      this.$refs.listContet.scrollToElement(listItems[index], 300)
+      let list = this.$refs.list
+      this.$refs.listContet.scrollToElement(list.$el.children[index], 300)
     },
     deleteOne(item) {
       this.deleteSong(item)

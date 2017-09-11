@@ -83,8 +83,10 @@ export default {
     },
     imgLoaded() {
       if (!this.imgChecked) {
-        this.$refs.scroll.refresh()
         this.imgChecked = true
+        setTimeout(() => {
+          this.$refs.scroll.refresh()
+        }, 20)
       }
     },
     avatarLoaded() {
