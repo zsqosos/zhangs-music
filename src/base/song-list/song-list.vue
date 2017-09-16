@@ -51,7 +51,7 @@ export default {
 }
 </script>
 
-<style lang="stylus">
+<style lang="stylus" scoped>
   @import "~common/stylus/variable"
   @import "~common/stylus/mixin"
 

@@ -50,6 +50,7 @@ export default {
   created() {
     this.listenScroll = true
     this.probeType = 3
+    this.touch = {}
     this.listHeight = []
   },
   computed: {
@@ -68,10 +69,11 @@ export default {
       this.$emit('selectedSinger', singer)
     },
     onShortcutTouchStart(e) {
-      let data = getData(e.target, 'index')
-      if (!data) return
-      this.touchStartIndex = parseInt(data)
-      this.scrollStartY = e.touches[0].clientY
+      // 获取滑动开始dom元素对应的index值
+      let anchorIndex = getData(e.target, 'index')
+      if (!anchorIndex) return
+      this.touchStartIndex = parseInt(anchorIndex)
+      this.scrollStartY = e.touches[0].pageY
       this.currentIndex = this._restrictIndex(this.touchStartIndex)
       this._scrollTo(this.currentIndex)
     },
@@ -82,8 +84,8 @@ export default {
       this.currentIndex = this._restrictIndex(nowTouchIndex)
       this._scrollTo(this.currentIndex)
     },
-    scroll(data) {
-      this.scrollY = -data.y
+    scroll(pos) {
+      this.scrollY = -pos.y
     },
     refresh() {
       this.$refs.scroll.refresh()
@@ -97,6 +99,10 @@ export default {
       return index
     },
     _scrollTo(index) {
+      if (!index && index !== 0) {
+        return
+      }
+      index = this._restrictIndex(index)
       this.$refs.scroll.scrollToElement(this.$refs.groupList[index], 0)
     },
     _calcHeight() {

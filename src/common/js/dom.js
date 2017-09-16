@@ -12,6 +12,7 @@ function hasClassName(el, className) {
   return reg.test(el.className)
 }
 
+// 获取dom元素上的属性和值
 export function getData(el, name, val) {
   const prefix = 'data-'
   if (val) {

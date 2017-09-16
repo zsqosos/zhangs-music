@@ -4,10 +4,14 @@ import router from './router'
 import fastclick from 'fastclick'
 import VueLazyLoad from 'vue-lazyload'
 import store from './store'
-import 'common/stylus/index.styl'
 import 'babel-polyfill'
+import 'common/stylus/index.styl'
+
+/* eslint-disable no-unused-vars */
+// import vConsole from 'vconsole'
 
 fastclick.attach(document.body)
+
 Vue.use(VueLazyLoad, {
   loading: require('common/image/default.png')
 })

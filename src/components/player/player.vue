@@ -12,7 +12,7 @@
           <h1 class="title" v-html="currentSong.name"></h1>
           <h1 class="subtitle" v-html="currentSong.singer"></h1>
         </div>
-        <div class="middle" @touchstart="middleTouchStart" @touchmove="middleTouchMove" @touchend="middleTouchEnd">
+        <div class="middle" @touchstart.prevent="middleTouchStart" @touchmove.prevent="middleTouchMove" @touchend="middleTouchEnd">
           <div class="middle-l" ref="middleL">
             <div class="cd-wrapper" ref="cdWrapper">
               <div class="cd" :class="cdCls">
@@ -27,6 +27,9 @@
             <div class="lyric-wrapper">
               <div v-if="currentLyric">
                 <p class="text" ref="lyricLine" :class="{'current':currentLineNum===index}" v-for="(line,index) in currentLyric.lines">{{line.txt}}</p>
+              </div>
+              <div class="pure-music" v-show="isPureMusic">
+                <p>{{pureMusicLyric}}</p>
               </div>
             </div>
           </scroll>
@@ -51,7 +54,7 @@
               <i @click="prev" class="icon-prev"></i>
             </div>
             <div class="icon i-center" :class="disableCls">
-              <i @click="togglePlaying" :class="playIcon"></i>
+              <i class="needsclick" @click="togglePlaying" :class="playIcon"></i>
             </div>
             <div class="icon i-right" :class="disableCls">
               <i @click="next" class="icon-next"></i>
@@ -72,9 +75,9 @@
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
-        <div @click.stop.prevent="togglePlaying" class="control">
+        <div class="control">
           <progress-circle :radius="radius" :percent="percent">
-            <i class="icon-mini" :class="miniIcon"></i>
+            <i @click.stop.prevent="togglePlaying" class="icon-mini" :class="miniIcon"></i>
           </progress-circle>
         </div>
         <div class="control" @click.stop="showPlayList">
@@ -82,7 +85,7 @@
         </div>
       </div>
     </transition>
-    <audio :src="currentSong.url" ref="audio" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <audio :src="currentSong.url" ref="audio" @play="ready" @error="error" @timeupdate="updateTime" @ended="end" @pause="paused"></audio>
     <play-list ref="playList"></play-list>
   </div>
 </template>
@@ -102,6 +105,8 @@ import { playMode } from 'common/js/config'
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
 
+const timeExp = /\[(\d{2}):(\d{2}):(\d{2})\]/
+
 export default {
   mixins: [playerMixin],
   data() {
@@ -112,7 +117,9 @@ export default {
       currentLyric: null,
       currentLineNum: 0,
       currentShow: 'cd',
-      playingLyric: ''
+      playingLyric: '',
+      isPureMusic: false,
+      pureMusicLyric: ''
     }
   },
   created() {
@@ -157,6 +164,12 @@ export default {
         this.currentLyric.togglePlay()
       }
     },
+    paused() {
+      this.setPlayingState(false)
+      if (this.currentLyric) {
+        this.currentLyric.stop()
+      }
+    },
     // 将时间戳格式化为分钟表示法
     format(interval) {
       interval = interval | 0
@@ -168,7 +181,11 @@ export default {
     ready() {
       this.songReady = true
       this.savePlayHistory(this.currentSong)
-      // 此处需要同步歌词 待填坑。。。
+      // 歌词出现早于歌曲播放，需将歌词进行同步
+      if (this.currentLyric) {
+        const currentTime = this.currentSong.duration * this.percent * 1000
+        this.currentLyric.seek(currentTime)
+      }
     },
     // 播放发生错误时，将songReade置为true，不影响后续播放
     error() {
@@ -268,7 +285,12 @@ export default {
       this.$refs.cdWrapper.style.transition = 'all 0.4s'
       const { x, y, scale } = this._getPosAndScale()
       this.$refs.cdWrapper.style[transform] = `translate3d(${x}px, ${y}px, 0) scale(${scale})`
-      this.$refs.cdWrapper.addEventListener('transitionend', done)
+      const timer = setTimeout(done, 400)
+      // qq、uc不能识别transitionend事件，此事件不会被触发
+      this.$refs.cdWrapper.addEventListener('transitionend', () => {
+        clearTimeout(timer)
+        done()
+      })
     },
     afterLeave() {
       this.$refs.cdWrapper.style.transition = ''
@@ -291,10 +313,18 @@ export default {
         if (this.currentSong.lyric !== lyric) {
           return
         }
-        // 使用其他库处理歌词
+        // 使用歌词梳理库处理歌词
         this.currentLyric = new Lyric(lyric, this.handleLyric)
-        if (this.playing) {
-          this.currentLyric.play()
+        this.isPureMusic = !this.currentLyric.lines.length
+        if (this.isPureMusic) {
+          this.pureMusicLyric = this.currentLyric.lrc.replace(timeExp, '').trim()
+          this.playingLyric = this.pureMusicLyric
+        } else {
+          if (this.playing && this.songReady) {
+            // 歌词出现较晚时，需要将歌词切到对应位置
+            const currentTime = this.currentSong.duration * this.percent * 1000
+            this.currentLyric.seek(currentTime)
+          }
         }
       }).catch(() => {
         this.currentLyric = null
@@ -421,7 +451,8 @@ export default {
         this.palyingLyric = ''
         this.currentLineNum = 0
       }
-      setTimeout(() => {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
       }, 1000)
@@ -464,7 +495,7 @@ export default {
         top: 0
         width: 100%
         height: 100%
-        z-index: -1
+        z-index: -2
         opacity: 0.6
         filter: blur(20px)
       .top
@@ -558,6 +589,11 @@ export default {
               font-size: $font-size-medium
               &.current
                 color: $color-text
+            .pure-music
+              padding-top: 50px
+              line-height: 32px
+              color: $color-text-l
+              font-size: $font-size-medium
       .bottom
         position: absolute
         bottom: 50px
@@ -621,11 +657,13 @@ export default {
         .top, .bottom
           transition: all 0.4s cubic-bezier(0.86, 0.18, 0.82, 1.32)
       &.normal-enter, &.normal-leave-to
-        opacity: 0
+        // opacity: 0
         .top
-          transform: translateY(-100px)
+          transform: translate3d(0, -100px, 0)
         .bottom
-          transform: translateY(100px)
+          transform: translate3d(0, 100px, 0)
+      &.normal-leave-to
+        opacity: 0
     .mini-player
       display: flex
       align-items: center

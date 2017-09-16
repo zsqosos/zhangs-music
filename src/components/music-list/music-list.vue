@@ -76,6 +76,7 @@ export default {
     },
     back() {
       this.$router.back()
+      console.log('back')
     },
     scroll(pos) {
       this.scrollY = pos.y
@@ -116,7 +117,7 @@ export default {
         zIndex = 10
       }
 
-      this.$refs.layer.style[transform] = `translateY(${translateY}px)`
+      this.$refs.layer.style[transform] = `translate3d(0 ,${translateY}px, 0)`
 
       if (this.minTranslateY > newY) {
         zIndex = 10

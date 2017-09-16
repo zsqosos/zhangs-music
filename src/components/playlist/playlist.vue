@@ -96,10 +96,17 @@ export default {
       this.$refs.listContet.scrollToElement(list.$el.children[index], 300)
     },
     deleteOne(item) {
+      if (item.deleting) {
+        return
+      }
+      item.deleting = true
       this.deleteSong(item)
       if (!this.sequenceList.length) {
         this.hide()
       }
+      setTimeout(() => {
+        item.deleting = false
+      }, 300)
     },
     confirmClear() {
       this.clearSongList()
@@ -178,7 +185,7 @@ export default {
           .clear
             extend-click()
             font-size: $font-size-medium
-            color: $font-text-d
+            color: $color-text-d
       .list-content
         max-height: 240px
         overflow: hidden
