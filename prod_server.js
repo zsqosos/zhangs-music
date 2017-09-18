@@ -1,5 +1,5 @@
 var express = require('express')
-// var compression = require('compression')
+var compression = require('compression')
 var axios = require('axios')
 
 var app = express()
@@ -48,6 +48,7 @@ apiRoutes.get('/lyric', function (req, res) {
 })
 
 app.use('/api', apiRoutes)
+app.use(compression())
 app.use(express.static('./dist'))
 
 app.listen(port, function(err) {

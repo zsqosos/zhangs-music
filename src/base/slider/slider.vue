@@ -54,8 +54,10 @@ export default {
   },
   methods: {
     refresh() {
-      this._setSliderWidth(true)
-      this.slider.refresh()
+      if (this.slider) {
+        this._setSliderWidth(true)
+        this.slider.refresh()
+      }
     },
     _setSliderWidth(isResize) {
       this.children = this.$refs.sliderGroup.children
