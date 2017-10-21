@@ -13,6 +13,7 @@ export default function jsonp(url, data, option) {
   })
 }
 
+// 将json数据以get方式添加到URL之后
 function jointUrl(url, data) {
   let queryString = ''
   for (let k in data) {

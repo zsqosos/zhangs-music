@@ -1,3 +1,4 @@
+// 轮播图组件
 <template>
   <div class="slider" ref="slider">
     <div class="slider-group" ref="sliderGroup">
@@ -59,6 +60,7 @@ export default {
         this.slider.refresh()
       }
     },
+    // 设置轮播图宽度
     _setSliderWidth(isResize) {
       this.children = this.$refs.sliderGroup.children
 
@@ -70,6 +72,7 @@ export default {
         addClass(child, 'slider-item')
         child.style.width = sliderWidth + 'px'
       }
+      // 无缝轮播需多加两张图片
       if (this.loop && !isResize) {
         width += 2 * sliderWidth
       }
@@ -123,6 +126,7 @@ export default {
       }, this.interval)
     }
   },
+  // 路由切换时执行
   activated() {
     let pageIndex = this.slider.getCurrentPage().pageX
     if (pageIndex > this.dots.lenght) {

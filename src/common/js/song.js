@@ -2,6 +2,7 @@ import {getLyric} from 'api/lyric'
 import {ERR_OK} from 'api/config'
 import {Base64} from 'js-base64'
 
+// 歌曲类
 export default class Song {
   constructor({id, mid, name, img, singer, album, duration, url}) {
     this.id = id
@@ -44,6 +45,7 @@ export function createSong(musicData) {
   })
 }
 
+// 处理歌手为多个的情况
 function filterSinger(singer) {
   let result = []
   if (!singer) {

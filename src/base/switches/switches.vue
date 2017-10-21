@@ -1,3 +1,4 @@
+// 切换按钮组件
 <template>
   <ul class="switches">
     <li class="switch-item" v-for="(item,index) in switches" :class="{active:currentIndex===index}" @click="switchItem(index)">

@@ -1,3 +1,4 @@
+// 用户中心组件
 <template>
   <transition name="slide">
     <div class="user-center">
@@ -86,6 +87,7 @@ export default {
         song: new Song(item)
       })
     },
+    // 随机播放
     random() {
       let list = this.currentIndex === 0 ? this.favoriteList : this.playHistory
       if (!list.length) {

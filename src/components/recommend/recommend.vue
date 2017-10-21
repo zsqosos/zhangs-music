@@ -1,3 +1,4 @@
+// 推荐组件
 <template>
   <div class="recommend" ref="recommond">
     <scroll class="recommend-content" ref="scroll" :data="discList">

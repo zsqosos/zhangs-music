@@ -22,6 +22,7 @@ export function getData(el, name, val) {
   }
 }
 
+// 创建一个元素，判断元素有无前缀属性，来确定浏览器环境
 let elementStyle = document.createElement('div').style
 
 let vendor = (() => {
@@ -40,6 +41,8 @@ let vendor = (() => {
   }
   return false
 })()
+
+// 为不同浏览器加上不同属性前缀
 export function prefixStyle(styleName) {
   if (vendor === false) {
     return false

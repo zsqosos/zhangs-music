@@ -1,3 +1,4 @@
+// 歌曲排名详情组件
 <template>
   <transition name="slider" class="top-list">
     <music-list :rank="rank" :songs="songs" :title="title" :bgImage="bgImg"></music-list>

@@ -1,3 +1,4 @@
+// 搜索结果组件
 <template>
   <scroll :data="result" class="suggest" ref="suggest" :pullup="pullup" :beforeScroll="beforeScroll" @beforeScroll="listScroll" @scrollToEnd="search">
     <ul class="suggest-list">
@@ -61,6 +62,7 @@ export default {
       return item.type === TYPE_SINGER ? item.singername : `${item.name} - ${item.singer}`
     },
     search() {
+      // 如果下一页数据存在,则获取下一页
       if (!this.hasMore) {
         return
       }
@@ -90,6 +92,7 @@ export default {
     listScroll() {
       this.$emit('listScroll')
     },
+    // 下一页数据是否存在
     _checkMore(data) {
       const song = data.song
       if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
@@ -98,6 +101,7 @@ export default {
     },
     _genResult(data) {
       let ret = []
+      // 将数据区分为歌手类型和歌曲类型
       if (data.zhida && data.zhida.singerid) {
         ret.push({ ...data.zhida, ...{ type: TYPE_SINGER } })
       }
@@ -115,6 +119,7 @@ export default {
       })
       return ret
     },
+    // 初始化参数
     _reInitData() {
       this.page = 0
       this.result = []

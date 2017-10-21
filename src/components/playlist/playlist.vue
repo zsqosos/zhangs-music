@@ -1,3 +1,4 @@
+// 播放列表组件
 <template>
   <transition name="list-fade">
     <div class="playlist" v-show="showFlag" @click="hide">

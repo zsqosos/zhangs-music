@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 Vue.use(Router)
-
+// 路由懒加载
 const recommend = () => import('components/recommend/recommend')
 const singer = () => import('components/singer/singer')
 const rank = () => import('components/rank/rank')

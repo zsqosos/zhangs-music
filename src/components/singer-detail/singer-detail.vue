@@ -1,3 +1,4 @@
+// 歌手详细页面
 <template>
   <transition name="slide">
     <music-list :songs="songs" :bg-image="bgImage" :title="title"></music-list>

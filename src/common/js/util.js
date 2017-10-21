@@ -1,7 +1,9 @@
+// 生成随机数
 function getRandomNum(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+// 乱序函数
 export function shuffle(arr) {
   let _arr = arr.slice()
   for (let i = 0; i < _arr.length; i++) {
@@ -13,6 +15,7 @@ export function shuffle(arr) {
   return _arr
 }
 
+// 函数防抖
 export function debounce(fn, delay) {
   let timer
 

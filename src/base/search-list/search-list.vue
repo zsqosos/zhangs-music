@@ -1,3 +1,4 @@
+// 搜索历史列表
 <template>
   <div class="search-list">
     <transition-group name="list" tag="ul">

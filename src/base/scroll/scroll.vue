@@ -1,3 +1,4 @@
+// 滚动组件，对better-scroll的封装
 <template>
   <div ref="scroll">
     <slot></slot>
@@ -70,6 +71,7 @@ export default {
 
       if (this.pullup) {
         this.scroll.on('scrollEnd', () => {
+          // 距离最大滚动距离50px时,触发滚动结束事件
           if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
             this.$emit('scrollToEnd')
           }
@@ -81,9 +83,11 @@ export default {
         })
       }
     },
+    // 启用滑动
     disable() {
       this.scroll && this.scroll.disable()
     },
+    // 禁止滑动
     enable() {
       this.scroll && this.scroll.enable()
     },

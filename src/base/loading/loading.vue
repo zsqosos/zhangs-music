@@ -1,3 +1,4 @@
+// 加载中组件
 <template>
   <div class="loading">
     <img height="24" width="24" src="./loading.gif">

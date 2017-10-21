@@ -1,3 +1,4 @@
+// 推荐页面的子路由组件,歌单详情页
 <template>
   <transition name="slider" class="disc">
     <music-list :title="title" :bg-image="bgImg" :songs="songs"></music-list>
@@ -32,6 +33,7 @@ export default {
     ])
   },
   methods: {
+    // 获取推荐歌单的详细内容
     _getDiscDetail() {
       if (!this.discList.dissid) {
         this.$router.push('/recommend')
@@ -43,6 +45,8 @@ export default {
         }
       })
     },
+
+    // 将获取到的歌曲数据格式化成已创建的歌曲类
     _normalizeSong(songs) {
       if (!songs) {
         return
@@ -63,8 +67,11 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-  .slider-enter-active, .slider-leave-active
-    transition: all 0.3s
-  .slider-enter, .slider-leave-to
-    transform: translate3d(100%,0,0)
+.slider-enter-active, .slider-leave-active {
+  transition: all 0.3s;
+}
+
+.slider-enter, .slider-leave-to {
+  transform: translate3d(100%, 0, 0);
+}
 </style>

@@ -1,3 +1,4 @@
+// 添加歌曲成功提示组件
 <template>
   <transition name="drop">
     <div v-show="showFlag" class="top-tip" @click.stop="hide">

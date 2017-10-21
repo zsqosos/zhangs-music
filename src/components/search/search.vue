@@ -1,3 +1,4 @@
+// 搜索组件
 <template>
   <div class="search">
     <div class="search-box-wrapper">

@@ -1,3 +1,4 @@
+// 从播放历史或搜索历史添加一首歌曲到播放列表
 <template>
   <transition name="slide">
     <div v-show="showFlag" class="add-song" @click.stop>

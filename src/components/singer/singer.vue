@@ -1,3 +1,4 @@
+// 歌手组件
 <template>
   <div class="singer" ref="singer">
     <list-view @selectedSinger="selectedSinger" :data="singer" ref="list"></list-view>
@@ -44,6 +45,7 @@ export default {
       })
     },
     _formatListData(originData) {
+      // 将原始歌手数据格式化成创建好的singer类
       let map = {
         hot: {
           title: HOT_TITLE,
@@ -69,7 +71,7 @@ export default {
           name: item.Fsinger_name
         }))
       })
-      // 对map进行排序
+      // 按字母顺序对map进行排序
       let ret = []
       let hot = []
       for (let key in map) {

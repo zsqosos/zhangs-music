@@ -1,5 +1,6 @@
 <template>
   <div class="player" v-show="playList.length>0">
+    <!-- 主播放器 -->
     <transition name="normal" @enter="enter" @after-enter="afterEnter" @leave="leave" @after-leave="afterLeave">
       <div v-show="fullScreen" class="normal-player">
         <div class="background">
@@ -66,6 +67,7 @@
         </div>
       </div>
     </transition>
+    <!-- mini播放器 -->
     <transition name="mini">
       <div @click="open" class="mini-player" v-show="!fullScreen">
         <div class="icon">
@@ -85,7 +87,9 @@
         </div>
       </div>
     </transition>
+    <!-- 音频 -->
     <audio :src="currentSong.url" ref="audio" @play="ready" @error="error" @timeupdate="updateTime" @ended="end" @pause="paused"></audio>
+    <!-- 播放列表 -->
     <play-list ref="playList"></play-list>
   </div>
 </template>
@@ -105,6 +109,7 @@ import { playMode } from 'common/js/config'
 const transform = prefixStyle('transform')
 const transitionDuration = prefixStyle('transitionDuration')
 
+// 匹配时间格式为00:00:00的正则
 const timeExp = /\[(\d{2}):(\d{2}):(\d{2})\]/
 
 export default {
@@ -138,6 +143,7 @@ export default {
     miniIcon() {
       return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
     },
+    // 播放进度
     percent() {
       return this.currentTime / this.currentSong.duration
     },
@@ -172,6 +178,7 @@ export default {
     },
     // 将时间戳格式化为分钟表示法
     format(interval) {
+      // 向下取整
       interval = interval | 0
       const minute = interval / 60 | 0
       const second = this._pad(interval % 60)
@@ -314,7 +321,7 @@ export default {
         if (this.currentSong.lyric !== lyric) {
           return
         }
-        // 使用歌词梳理库处理歌词
+        // 使用歌词处理库处理歌词
         this.currentLyric = new Lyric(lyric, this.handleLyric)
         this.isPureMusic = !this.currentLyric.lines.length
         if (this.isPureMusic) {

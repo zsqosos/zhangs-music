@@ -1,3 +1,4 @@
+// 列表联动组件
 <template>
   <scroll class="listview" :data="data" :probe-type="probeType" :listen-scroll="listenScroll" @scroll="scroll" ref="scroll">
     <ul>

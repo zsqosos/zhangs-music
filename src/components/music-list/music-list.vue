@@ -1,3 +1,4 @@
+// 歌曲列表组件
 <template>
   <div class="music-list">
     <div class="back" @click="back">
@@ -11,6 +12,7 @@
           <span class="text">随机播放全部</span>
         </div>
       </div>
+      <!-- 上滑的蒙层 -->
       <div class="filter" ref="filter"></div>
     </div>
     <div class="bg-layer" ref="layer"></div>
@@ -33,6 +35,7 @@ import { prefixStyle } from 'common/js/dom'
 import { mapActions } from 'vuex'
 import { playListMixin } from 'common/js/mixin'
 
+// 顶部标题高度
 const RESERVED_HEIGHT = 40
 const transform = prefixStyle('transform')
 
@@ -107,6 +110,7 @@ export default {
   },
   watch: {
     scrollY(newY) {
+      // 下滑到底部时,放大图片;上滑到顶部时,漏出头部标题
       let translateY = Math.max(newY, this.minTranslateY)
       let zIndex = 0
       let scale = 1

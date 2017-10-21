@@ -4,6 +4,7 @@ import {
   options
 } from './config'
 
+// jsonp获取歌手列表数据
 export function getSingerList() {
   const url = 'https://c.y.qq.com/v8/fcg-bin/v8.fcg'
 
@@ -21,6 +22,7 @@ export function getSingerList() {
   return jsonp(url, data, options)
 }
 
+// jsonp获取歌手详情数据
 export function getSingerDetail(singerId) {
   const url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
   const data = Object.assign({}, commonParams, {

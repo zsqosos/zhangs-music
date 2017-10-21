@@ -1,3 +1,4 @@
+// 切换按钮组件
 <template>
   <div class="tab">
     <router-link tag="div" class="tab-item" to="/recommend">

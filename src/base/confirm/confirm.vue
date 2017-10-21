@@ -1,3 +1,4 @@
+// 弹出确认框
 <template>
   <div v-show="showFlag" class="confirm">
     <div class="confirm-wrapper" @click.stop="">

@@ -1,3 +1,4 @@
+// 排行组件
 <template>
   <div class="rank" ref="rank">
     <scroll :data="topList" class="topList" ref="scroll">

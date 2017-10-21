@@ -1,3 +1,4 @@
+// 带按钮的搜索框组件
 <template>
   <div class="search-box">
     <i class="icon-search"></i>
@@ -33,7 +34,7 @@ export default {
     }
   },
   created() {
-    // 截留  函数防抖，200毫秒内只触发一次
+    // 截流  函数防抖，200毫秒内只触发一次
     this.debounce = debounce((newValue) => {
       this.$emit('query', newValue)
     }, 200)

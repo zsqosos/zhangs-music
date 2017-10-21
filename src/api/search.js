@@ -1,6 +1,7 @@
 import jsonp from 'common/js/jsonp'
 import { commonParams, options } from './config'
 
+// jspon获取热门搜索词
 export function getHotKey() {
   const url = 'https://c.y.qq.com/splcloud/fcgi-bin/gethotkey.fcg'
 
@@ -14,6 +15,7 @@ export function getHotKey() {
   return jsonp(url, data, options)
 }
 
+// jspon获取搜索数据
 export function getSearch(query, page, zhida, perpage) {
   const url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
 
